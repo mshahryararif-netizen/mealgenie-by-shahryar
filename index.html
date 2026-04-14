@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Genie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">🍳</span>
+                <span class="logo-text">Meal Genie</span>
+            </div>
+            <div class="header-actions">
+                <button class="blog-btn" onclick="toggleBlog()">💬 Community</button>
+                <button class="header-btn" onclick="showFavorites()">
+                    ❤️ <span id="favCount">0</span>
+                </button>
+                <button class="settings-btn" onclick="toggleSettings()">🎨</button>
+            </div>
+        </header>
+
+        <div class="blog-panel" id="blogPanel">
+            <h3 class="blog-title">💬 Community</h3>
+            <div class="blog-tabs">
+                <button class="blog-tab active" onclick="openShareRecipe()">📝 Share Recipe</button>
+                <button class="blog-tab" onclick="openReportBug()">🐛 Report Bug</button>
+                <button class="blog-tab" onclick="openHangout()">💬 Hangout</button>
+            </div>
+            <div class="blog-form">
+                <input type="text" id="postTitle" placeholder="Title...">
+                <textarea id="postContent" placeholder="Share your recipe, report a bug, or just say hi!"></textarea>
+                <button class="submit-post-btn" onclick="submitBlogPost(document.getElementById('postType').value)">
+                    Post
+                </button>
+            </div>
+            <input type="hidden" id="postType" value="share">
+            <div class="blog-posts" id="blogPosts"></div>
+        </div>
+
+        <div class="settings-panel" id="settingsPanel">
+            <h3 class="settings-title">Background Color</h3>
+            <div class="color-options">
+                <button class="color-option" style="background:#FEF9F3;" data-color="#FEF9F3" onclick="setBgColor('#FEF9F3')"></button>
+                <button class="color-option" style="background:#F0FDF4;" data-color="#F0FDF4" onclick="setBgColor('#F0FDF4')"></button>
+                <button class="color-option" style="background:#FFF7ED;" data-color="#FFF7ED" onclick="setBgColor('#FFF7ED')"></button>
+                <button class="color-option" style="background:#FEFCE8;" data-color="#FEFCE8" onclick="setBgColor('#FEFCE8')"></button>
+                <button class="color-option" style="background:#EFF6FF;" data-color="#EFF6FF" onclick="setBgColor('#EFF6FF')"></button>
+                <button class="color-option" style="background:#FDF2F8;" data-color="#FDF2F8" onclick="setBgColor('#FDF2F8')"></button>
+                <button class="color-option" style="background:#FFFFFF;" data-color="#FFFFFF" onclick="setBgColor('#FFFFFF')"></button>
+            </div>
+        </div>
+
+        <div class="main-split">
+            <div class="left-panel">
+                <div class="panel-search">
+                    <input type="text" id="ingSearch" placeholder="Search ingredients..." oninput="filterIngredients()">
+                </div>
+                
+                <div class="cuisine-filter-bar">
+                    <span class="filter-label">Cuisine:</span>
+                    <div class="cuisine-chips">
+                        <button class="cuisine-chip active" data-cuisine="Any" onclick="setCuisine('Any')">🌍 Any</button>
+                        <button class="cuisine-chip" data-cuisine="Italian" onclick="setCuisine('Italian')">🍝 Italian</button>
+                        <button class="cuisine-chip" data-cuisine="Mexican" onclick="setCuisine('Mexican')">🌮 Mexican</button>
+                        <button class="cuisine-chip" data-cuisine="Indian" onclick="setCuisine('Indian')">🍛 Indian</button>
+                        <button class="cuisine-chip" data-cuisine="Chinese" onclick="setCuisine('Chinese')">🥡 Chinese</button>
+                        <button class="cuisine-chip" data-cuisine="Mediterranean" onclick="setCuisine('Mediterranean')">🥙 Mediterranean</button>
+                        <button class="cuisine-chip" data-cuisine="American" onclick="setCuisine('American')">🍔 American</button>
+                        <button class="cuisine-chip" data-cuisine="Fusion" onclick="setCuisine('Fusion')">✨ Fusion</button>
+                    </div>
+                </div>
+
+                <div class="ingredients-grid" id="ingredientsGrid"></div>
+
+                <div class="bottom-actions">
+                    <div class="quick-actions">
+                        <button class="quick-btn" id="leftoverBtn" onclick="toggleLeftoverMode()">
+                            🔄 Use Leftovers
+                        </button>
+                        <button class="view-all-btn" onclick="showAllMeals()">
+                            📖 View All Recipes
+                        </button>
+                    </div>
+                    <div class="selected-row">
+                        <span id="selectedCount">0 selected</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel" id="rightPanel">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">👨‍🍳</div>
+                    <h2>What are we cooking?</h2>
+                    <p>Select ingredients to discover recipes</p>
+                    <div class="selected-tags" id="selectedTags"></div>
+                </div>
+
+                <div class="results-container" id="resultsContainer" style="display:none;"></div>
+
+                <div class="all-meals-view" id="allMealsView" style="display:none;">
+                    <div id="cuisineGroups"></div>
+                </div>
+
+                <div class="recipe-view" id="recipeView" style="display:none;">
+                    <div class="recipe-hero">
+                        <div class="hero-icon" id="heroIcon">🍝</div>
+                        <div class="hero-text">
+                            <span class="cuisine-badge" id="cuisineBadge">Italian</span>
+                            <h1 id="recipeName">Recipe Name</h1>
+                            <div class="hero-meta" id="heroMeta"></div>
+                        </div>
+                    </div>
+
+                    <div class="servings-bar">
+                        <span>Servings:</span>
+                        <button class="serv-btn" onclick="setServings(1)">1x</button>
+                        <button class="serv-btn active" onclick="setServings(2)">2x</button>
+                        <button class="serv-btn" onclick="setServings(4)">4x</button>
+                    </div>
+
+                    <div class="section-block">
+                        <h3 class="block-title">Ingredients</h3>
+                        <div class="ingredients-display" id="ingredientsDisplay"></div>
+                    </div>
+
+                    <div class="section-block">
+                        <h3 class="block-title">Missing</h3>
+                        <div class="missing-list" id="missingList"></div>
+                    </div>
+
+                    <div class="section-block">
+                        <h3 class="block-title">Steps</h3>
+                        <div class="steps-list" id="stepsList"></div>
+                    </div>
+
+                    <div class="section-block">
+                        <h3 class="block-title">Substitutions</h3>
+                        <div class="subs-list" id="subsList"></div>
+                    </div>
+
+                    <div class="tags-bar" id="tagsBar"></div>
+
+                    <button class="fav-btn" id="favBtn" onclick="toggleFav()">🤍 Save Recipe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
