@@ -2,33 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#22C55E">
     <title>Meal Genie</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- 3D Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-bg">
+            <canvas id="loadingCanvas"></canvas>
+        </div>
+        <div class="loading-content">
+            <div class="loading-logo">
+                <span class="loading-icon">🍳</span>
+                <h1 class="loading-title">Meal Genie</h1>
+            </div>
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <p class="loading-text">Preparing your recipes...</p>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <p class="loading-percent" id="loadingPercent">0%</p>
+        </div>
+    </div>
+
     <div class="app">
+        <!-- Header -->
         <header class="app-header">
             <div class="logo">
                 <span class="logo-icon">🍳</span>
                 <span class="logo-text">Meal Genie</span>
             </div>
             <div class="header-actions">
-                <button class="blog-btn" onclick="toggleBlog()">💬 Community</button>
-                <button class="header-btn" onclick="showFavorites()">
+                <button class="blog-btn" onclick="toggleBlog()" aria-label="Community">💬</button>
+                <button class="header-btn" onclick="showFavorites()" aria-label="Favorites">
                     ❤️ <span id="favCount">0</span>
                 </button>
-                <button class="settings-btn" onclick="toggleSettings()">🎨</button>
+                <button class="settings-btn" onclick="toggleSettings()" aria-label="Settings">🎨</button>
             </div>
         </header>
 
+        <!-- Blog Panel (Full Screen Mobile) -->
         <div class="blog-panel" id="blogPanel">
-            <h3 class="blog-title">💬 Community</h3>
+            <div class="blog-panel-header">
+                <h3 class="blog-title">💬 Community</h3>
+                <button class="blog-panel-close" onclick="toggleBlog()">✕</button>
+            </div>
             <div class="blog-tabs">
-                <button class="blog-tab active" onclick="openShareRecipe()">📝 Share Recipe</button>
-                <button class="blog-tab" onclick="openReportBug()">🐛 Report Bug</button>
-                <button class="blog-tab" onclick="openHangout()">💬 Hangout</button>
+                <button class="blog-tab active" onclick="openShareRecipe()">📝 Share</button>
+                <button class="blog-tab" onclick="openReportBug()">🐛 Bug</button>
+                <button class="blog-tab" onclick="openHangout()">💬 Chat</button>
             </div>
             <div class="blog-form">
                 <input type="text" id="postTitle" placeholder="Title...">
@@ -41,8 +72,12 @@
             <div class="blog-posts" id="blogPosts"></div>
         </div>
 
+        <!-- Settings Panel (Full Screen Mobile) -->
         <div class="settings-panel" id="settingsPanel">
-            <h3 class="settings-title">Background Color</h3>
+            <div class="settings-panel-header">
+                <button class="settings-panel-close" onclick="toggleSettings()">✕</button>
+                <h3 class="settings-title">Background Color</h3>
+            </div>
             <div class="color-options">
                 <button class="color-option" style="background:#FEF9F3;" data-color="#FEF9F3" onclick="setBgColor('#FEF9F3')"></button>
                 <button class="color-option" style="background:#F0FDF4;" data-color="#F0FDF4" onclick="setBgColor('#F0FDF4')"></button>
@@ -54,43 +89,49 @@
             </div>
         </div>
 
-        <div class="main-split">
-            <div class="left-panel">
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Search Section -->
+            <div class="search-section" id="searchSection">
                 <div class="panel-search">
                     <input type="text" id="ingSearch" placeholder="Search ingredients..." oninput="filterIngredients()">
                 </div>
-                
-                <div class="cuisine-filter-bar">
-                    <span class="filter-label">Cuisine:</span>
-                    <div class="cuisine-chips">
-                        <button class="cuisine-chip active" data-cuisine="Any" onclick="setCuisine('Any')">🌍 Any</button>
-                        <button class="cuisine-chip" data-cuisine="Italian" onclick="setCuisine('Italian')">🍝 Italian</button>
-                        <button class="cuisine-chip" data-cuisine="Mexican" onclick="setCuisine('Mexican')">🌮 Mexican</button>
-                        <button class="cuisine-chip" data-cuisine="Indian" onclick="setCuisine('Indian')">🍛 Indian</button>
-                        <button class="cuisine-chip" data-cuisine="Chinese" onclick="setCuisine('Chinese')">🥡 Chinese</button>
-                        <button class="cuisine-chip" data-cuisine="Mediterranean" onclick="setCuisine('Mediterranean')">🥙 Mediterranean</button>
-                        <button class="cuisine-chip" data-cuisine="American" onclick="setCuisine('American')">🍔 American</button>
-                        <button class="cuisine-chip" data-cuisine="Fusion" onclick="setCuisine('Fusion')">✨ Fusion</button>
-                    </div>
-                </div>
+            </div>
 
-                <div class="ingredients-grid" id="ingredientsGrid"></div>
-
-                <div class="bottom-actions">
-                    <div class="quick-actions">
-                        <button class="quick-btn" id="leftoverBtn" onclick="toggleLeftoverMode()">
-                            🔄 Use Leftovers
-                        </button>
-                        <button class="view-all-btn" onclick="showAllMeals()">
-                            📖 View All Recipes
-                        </button>
-                    </div>
-                    <div class="selected-row">
-                        <span id="selectedCount">0 selected</span>
-                    </div>
+            <!-- Cuisine Filter -->
+            <div class="cuisine-filter-bar" id="cuisineFilterBar">
+                <span class="filter-label">Cuisine</span>
+                <div class="cuisine-chips">
+                    <button class="cuisine-chip active" data-cuisine="Any" onclick="setCuisine('Any')">🌍 Any</button>
+                    <button class="cuisine-chip" data-cuisine="Italian" onclick="setCuisine('Italian')">🍝 Italian</button>
+                    <button class="cuisine-chip" data-cuisine="Mexican" onclick="setCuisine('Mexican')">🌮 Mexican</button>
+                    <button class="cuisine-chip" data-cuisine="Indian" onclick="setCuisine('Indian')">🍛 Indian</button>
+                    <button class="cuisine-chip" data-cuisine="Chinese" onclick="setCuisine('Chinese')">🥡 Chinese</button>
+                    <button class="cuisine-chip" data-cuisine="Mediterranean" onclick="setCuisine('Mediterranean')">🥙 Med</button>
+                    <button class="cuisine-chip" data-cuisine="American" onclick="setCuisine('American')">🍔 American</button>
+                    <button class="cuisine-chip" data-cuisine="Fusion" onclick="setCuisine('Fusion')">✨ Fusion</button>
                 </div>
             </div>
 
+            <!-- Ingredients Grid -->
+            <div class="ingredients-grid" id="ingredientsGrid"></div>
+
+            <!-- Bottom Actions -->
+            <div class="bottom-actions" id="bottomActions">
+                <div class="quick-actions">
+                    <button class="quick-btn" id="leftoverBtn" onclick="toggleLeftoverMode()">
+                        🔄 Use Leftovers
+                    </button>
+                    <button class="view-all-btn" onclick="showAllMeals()">
+                        📖 View All Recipes
+                    </button>
+                </div>
+                <div class="selected-row">
+                    <span id="selectedCount">0 selected</span>
+                </div>
+            </div>
+
+            <!-- Right Panel (Desktop Only) -->
             <div class="right-panel" id="rightPanel">
                 <div class="empty-state" id="emptyState">
                     <div class="empty-icon">👨‍🍳</div>
@@ -99,13 +140,11 @@
                     <div class="selected-tags" id="selectedTags"></div>
                 </div>
 
-                <div class="results-container" id="resultsContainer" style="display:none;"></div>
-
-                <div class="all-meals-view" id="allMealsView" style="display:none;">
+                <div class="results-container" id="resultsContainer"></div>
+                <div class="all-meals-view" id="allMealsView">
                     <div id="cuisineGroups"></div>
                 </div>
-
-                <div class="recipe-view" id="recipeView" style="display:none;">
+                <div class="recipe-view" id="recipeView">
                     <div class="recipe-hero">
                         <div class="hero-icon" id="heroIcon">🍝</div>
                         <div class="hero-text">
@@ -116,10 +155,12 @@
                     </div>
 
                     <div class="servings-bar">
-                        <span>Servings:</span>
-                        <button class="serv-btn" onclick="setServings(1)">1x</button>
-                        <button class="serv-btn active" onclick="setServings(2)">2x</button>
-                        <button class="serv-btn" onclick="setServings(4)">4x</button>
+                        <span>Servings</span>
+                        <div class="serv-btns">
+                            <button class="serv-btn" onclick="setServings(1)">1x</button>
+                            <button class="serv-btn active" onclick="setServings(2)">2x</button>
+                            <button class="serv-btn" onclick="setServings(4)">4x</button>
+                        </div>
                     </div>
 
                     <div class="section-block">
@@ -147,9 +188,27 @@
                     <button class="fav-btn" id="favBtn" onclick="toggleFav()">🤍 Save Recipe</button>
                 </div>
             </div>
-        </div>
+        </main>
+
+        <!-- Bottom Navigation (Mobile Only) -->
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="nav-item active" onclick="showIngredients()" id="navIngredients">
+                <span class="nav-item-icon">🥘</span>
+                <span class="nav-item-label">Ingredients</span>
+            </button>
+            <button class="nav-item" onclick="showResults()" id="navResults">
+                <span class="nav-item-icon">🍽️</span>
+                <span class="nav-item-label">Recipes</span>
+            </button>
+            <button class="nav-item" onclick="showAllMeals()" id="navAll">
+                <span class="nav-item-icon">📖</span>
+                <span class="nav-item-label">Browse</span>
+            </button>
+        </nav>
     </div>
 
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="script.js"></script>
+    <script src="loading.js"></script>
 </body>
 </html>
