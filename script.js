@@ -253,6 +253,279 @@ let generatedRecipes = JSON.parse(localStorage.getItem('mealGenieGenerated') || 
 let currentGeneratedIndex = -1;
 let currentRecipe = null;
 let blogPosts = JSON.parse(localStorage.getItem('mealGenieBlog') || '[]');
+let cookingState = {
+    currentRecipe: null,
+    currentStep: 0,
+    isGuiding: false
+};
+
+// ===== CHATBOT FUNCTIONS =====
+function toggleChatbot() {
+    const panel = document.getElementById('chatbotPanel');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) {
+        document.getElementById('blogPanel').classList.remove('open');
+        document.getElementById('settingsPanel').classList.remove('open');
+    }
+}
+
+function addChatbotMessage(text, isUser = false) {
+    const container = document.getElementById('chatbotMessages');
+    const msg = document.createElement('div');
+    msg.className = isUser ? 'chat-msg-user' : 'chat-msg-bot';
+    msg.innerHTML = `<p>${text}</p>`;
+    container.appendChild(msg);
+    container.scrollTop = container.scrollHeight;
+}
+
+function sendChatbotMessage() {
+    const input = document.getElementById('chatbotInput');
+    const message = input.value.trim();
+    if (!message) return;
+    
+    addChatbotMessage(message, true);
+    input.value = '';
+    
+    processChatbotMessage(message);
+}
+
+async function processChatbotMessage(message) {
+    const lowerMsg = message.toLowerCase();
+    
+    if (lowerMsg.includes('next') && cookingState.isGuiding) {
+        provideNextStep();
+        return;
+    }
+    if (lowerMsg.includes('repeat') && cookingState.isGuiding) {
+        repeatCurrentStep();
+        return;
+    }
+    if (lowerMsg.includes('pause') || lowerMsg.includes('stop')) {
+        stopCookingGuide();
+        return;
+    }
+    
+    try {
+        await getAIResponse(message);
+    } catch (error) {
+        addChatbotMessage("Sorry, I couldn't process that. Please try again!");
+    }
+}
+
+async function getAIResponse(message) {
+    const hasApiKey = getOpenRouterKey();
+    
+    if (hasApiKey) {
+        await getAIResponseOnline(message);
+    } else {
+        getLocalResponse(message);
+    }
+}
+
+function getLocalResponse(message) {
+    const lowerMsg = message.toLowerCase();
+    let response = null;
+    
+    const localKnowledge = [
+        { keywords: ['how to make', 'how do i', 'how to cook', 'how to prepare', 'recipe for', 'instructions'], 
+          response: "I can help! Select ingredients from the app to see matching recipes. Or ask me a specific cooking question and I'll do my best to help from my cooking knowledge." },
+        { keywords: ['scrambled eggs', 'scramble egg'], 
+          response: "Crack 3 eggs into a bowl, add a pinch of salt, and whisk. Heat 1 tbsp butter in a pan over medium-low heat. Pour in eggs, stir gently until soft curds form. Remove while slightly underdone - they'll finish cooking from residual heat. Serve immediately!" },
+        { keywords: ['grilled cheese', 'grill cheese'], 
+          response: "Butter one side of each bread slice. Place bread butter-side down in a non-stick pan over medium heat. Layer cheese slices on top. Top with second bread, butter-side up. Cook 3-4 min until golden, flip carefully, cook other side 3 min. Slice diagonal and serve hot!" },
+        { keywords: ['chicken'], 
+          response: "Season chicken with salt and pepper. Pan-fry 5-6 minutes per side over medium-high heat until internal temp reaches 165°F. Let rest 5 minutes before slicing. Tip: Pound chicken thin for faster, even cooking!" },
+        { keywords: ['pasta', 'spaghetti'], 
+          response: "Boil a large pot of salted water (should taste like the sea). Cook pasta according to package time minus 1 minute for al dente. Reserve 1 cup pasta water before draining. Toss with your sauce and add pasta water to loosen if needed." },
+        { keywords: ['rice', 'cook rice'], 
+          response: "Rinse rice until water runs clear. Use a 1:1.5 ratio (rice to water). Bring to boil, reduce heat to low, cover and cook 18 minutes. Let rest covered 5 minutes, then fluff with fork. Day-old rice is best for fried rice!" },
+        { keywords: ['substitute', 'replacement', 'instead of', 'swap'], 
+          response: "Common swaps: Butter → Olive oil or Mayo. Milk → Water or plant milk. Eggs → Flax eggs (1 tbsp ground flax + 3 tbsp water per egg). Sugar → Honey or maple syrup. Flour → Gluten-free flour blend." },
+        { keywords: ['egg'], 
+          response: "Egg basics: Room temp eggs crack easier. To hard boil: Place in cold water, bring to boil, remove from heat and cover 12 min. To soft boil: 6-7 minutes. To fry: heat oil in pan, crack egg carefully, cook 2-3 min for runny yolk." },
+        { keywords: ['chop', 'cut', 'dice', 'slice'], 
+          response: " Knife tips: Use a sharp knife! Dice = small cubes. Mince = very fine pieces. Julienne = thin matchstick strips. Slice = any thickness. Always curl fingers under when chopping (knuckle guide). Safety first!" },
+        { keywords: ['season', 'flavor', 'spice'], 
+          response: "Basic seasoning: Salt enhances flavor. Pepper adds heat. cumin = earthy, for Mexican/Indian. Paprika = sweet/smoky. Oregano = Italian. Turmeric = earthy, turns food yellow. Taste as you go!" },
+        { keywords: ['oven', 'bake', 'temperature'], 
+          response: "Common temps: 325°F = slow bake (cheesecake). 350°F = standard bake (cakes, cookies). 375°F = slightly hotter. 400°F = hot bake (pies, pizza). 425°F+ = very hot (roasted veggies). Always preheat!" },
+        { keywords: ['thank', 'thanks'], 
+          response: "You're welcome! Happy cooking! 🍳 If you need help with anything else, just ask!" },
+        { keywords: ['hello', 'hi', 'hey', 'help'], 
+          response: "Hi there! 👋 I'm your cooking assistant. I can help with recipes, cooking techniques, ingredient substitutions, or step-by-step guidance. What are you cooking today?" },
+        { keywords: ['stir fry', 'stir-fry', 'wok'], 
+          response: "Stir fry tips: Cut everything same size for even cooking. Heat wok until smoking, add oil then food. Keep food moving - don't overcrowd. High heat, short time = crispy veggies! Have all ingredients ready before you start (mise en place)." },
+        { keywords: ['soup', 'stew'], 
+          response: "Soup tip: Sauté aromatics (onion, garlic, celery) first. Add liquids, bring to simmer. Most soups taste better the next day - flavors meld! For thicken, make a roux or blend and add back." },
+        { keywords: ['salad', 'dressing'], 
+          response: "Salad tip: Wash and dry lettuce in a salad spinner. For dressing: oil + acid (vinegar/lemon) + salt + pepper = basic vinaigrette. Toss salad just before serving, not in the bowl you'll store it in!" },
+        { keywords: ['cook', 'prepare', 'make'], 
+          response: "Select ingredients in the app to see matching recipes! Or ask me about specific cooking techniques - I'm here to help step by step. What would you like to cook?" },
+    ];
+    
+    for (const item of localKnowledge) {
+        if (item.keywords.some(k => lowerMsg.includes(k))) {
+            response = item.response;
+            break;
+        }
+    }
+    
+    if (!response) {
+        response = "That's a cooking question! From my knowledge: start with fresh ingredients, season as you go, and don't be afraid to experiment. 😊 Select ingredients in the app for matching recipes, or ask a more specific cooking question!";
+    }
+    
+    addChatbotMessage(response);
+}
+
+async function getAIResponseOnline(message) {
+    addChatbotMessage("Thinking...");
+    
+    const systemPrompt = `You are a friendly voice cooking assistant inside the MealGenie app. Your rules:
+1. ONLY respond to cooking-related topics (recipes, ingredients, kitchen tasks, food preparation)
+2. If asked anything outside cooking, say: "Oops! I can only help with cooking-related questions. Please ask something about food, recipes, or cooking."
+3. Keep responses SHORT and CONCISE - max 2-3 sentences for voice optimization
+4. When guiding cooking steps, give ONE step at a time and wait for "next" command
+5. Be friendly, practical, and beginner-friendly
+6. Suggest simple ingredient substitutions when relevant`;
+
+    try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getOpenRouterKey(),
+                'HTTP-Referer': window.location.href,
+                'X-Title': 'MealGenie Cooking Assistant'
+            },
+            body: JSON.stringify({
+                model: 'anthropic/claude-3-haiku',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: message }
+                ],
+                max_tokens: 300
+            })
+        });
+        
+        if (!response.ok) throw new Error('API error');
+        
+        const data = await response.json();
+        const botMsg = data.choices[0].message.content;
+        
+        document.querySelector('#chatbotMessages .chat-msg-bot:last-child')?.remove();
+        
+        if (botMsg.includes('[STEP:')) {
+            handleStepCommand(botMsg, message);
+        } else {
+            addChatbotMessage(botMsg);
+        }
+    } catch (error) {
+        document.querySelector('#chatbotMessages .chat-msg-bot:last-child')?.remove();
+        addChatbotMessage("I'm having trouble connecting. Your question has been saved - try again or check your API key in Settings.");
+    }
+}
+
+function handleStepCommand(response, originalMsg) {
+    const stepMatch = response.match(/\[STEP:(\d+)\]/);
+    if (stepMatch) {
+        const recipeId = parseInt(stepMatch[1]);
+        startCookingGuide(recipeId);
+        const cleanResponse = response.replace(/\[STEP:\d+\]/g, '').trim();
+        if (cleanResponse) addChatbotMessage(cleanResponse);
+    } else {
+        addChatbotMessage(response);
+    }
+}
+
+function startCookingGuide(recipeId) {
+    const allRecipes = [...recipes, ...generatedRecipes];
+    const recipe = allRecipes.find(r => r.id === recipeId);
+    if (!recipe) return;
+    
+    cookingState.currentRecipe = recipe;
+    cookingState.currentStep = 0;
+    cookingState.isGuiding = true;
+    
+    addChatbotMessage(`🍳 Let's cook ${recipe.name}! I'll guide you step by step. Say "next" to continue, "repeat" to hear it again, or "pause" to stop.`);
+    provideNextStep();
+}
+
+function provideNextStep() {
+    if (!cookingState.currentRecipe) return;
+    
+    const step = cookingState.currentRecipe.steps[cookingState.currentStep];
+    if (!step) {
+        addChatbotMessage("🎉 That's all the steps! Your dish should be ready. Enjoy your meal!");
+        cookingState.isGuiding = false;
+        return;
+    }
+    
+    const stepNum = cookingState.currentStep + 1;
+    addChatbotMessage(`Step ${stepNum}: ${step}`);
+    cookingState.currentStep++;
+}
+
+function repeatCurrentStep() {
+    if (!cookingState.currentRecipe || cookingState.currentStep === 0) return;
+    const step = cookingState.currentRecipe.steps[cookingState.currentStep - 1];
+    addChatbotMessage(`I said: Step ${cookingState.currentStep}: ${step}`);
+}
+
+function stopCookingGuide() {
+    cookingState.isGuiding = false;
+    cookingState.currentRecipe = null;
+    cookingState.currentStep = 0;
+    addChatbotMessage("Cooking guide paused. Just say 'next' anytime to resume, or ask me something else!");
+}
+
+function getOpenRouterKey() {
+    return localStorage.getItem('mealGenieOpenRouterKey') || '';
+}
+
+function setOpenRouterKey(key) {
+    localStorage.setItem('mealGenieOpenRouterKey', key);
+    addChatbotMessage("✅ API key saved! You can now use the AI cooking assistant.");
+}
+
+function saveApiKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (key) {
+        setOpenRouterKey(key);
+        document.getElementById('apiKeyInput').value = '';
+        alert('API key saved successfully!');
+    } else {
+        alert('Please enter a valid API key.');
+    }
+}
+
+function startVoiceInput() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        addChatbotMessage("Voice input not supported in this browser. Please type your question.");
+        return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    document.getElementById('voiceBtn').classList.add('recording');
+    
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('chatbotInput').value = transcript;
+        sendChatbotMessage();
+        document.getElementById('voiceBtn').classList.remove('recording');
+    };
+    
+    recognition.onerror = () => {
+        document.getElementById('voiceBtn').classList.remove('recording');
+        addChatbotMessage("Voice input failed. Please try again or type your question.");
+    };
+    
+    recognition.start();
+}
 
 // ===== RECIPE MATCHING =====
 function getMatchingRecipes() {
