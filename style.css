@@ -1686,3 +1686,61 @@ body.loading { overflow: hidden; }
     
     .blog-panel, .settings-panel, .chatbot-panel { position: fixed; }
 }
+
+/* ===== MOBILE SPECIFIC (under 768px) ===== */
+@media (max-width: 767px) {
+    .app-header {
+        padding: 10px 12px !important;
+        padding-top: calc(10px + env(safe-area-inset-top, 0px)) !important;
+    }
+    
+    .logo-text { font-size: 18px !important; }
+    .logo-icon { font-size: 24px !important; }
+    
+    .header-actions { gap: 6px !important; }
+    
+    .header-btn, .blog-btn, .settings-btn {
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+        min-height: 36px !important;
+    }
+    
+    .chatbot-btn {
+        padding: 6px 8px !important;
+        font-size: 16px !important;
+        min-height: 36px !important;
+        min-width: 36px !important;
+    }
+    
+    .bottom-nav {
+        display: flex !important;
+        -webkit-box-pack: space-around;
+        justify-content: space-around;
+    }
+    
+    .nav-item-icon { font-size: 22px !important; }
+    .nav-item-label { font-size: 10px !important; }
+    
+    .ingredients-grid {
+        grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)) !important;
+        gap: 8px !important;
+        padding: 10px !important;
+    }
+    
+    .ing-chip {
+        padding: 8px 4px !important;
+        min-height: 80px !important;
+    }
+    
+    .ing-icon { font-size: 26px !important; }
+    .ing-name { font-size: 9px !important; }
+    
+    .chatbot-btn {
+        background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+        color: white !important;
+    }
+    
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+}
