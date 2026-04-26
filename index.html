@@ -33,6 +33,7 @@
                 <span class="logo-text">Meal Genie</span>
             </div>
             <div class="header-actions">
+                <button class="deluxe-btn" onclick="toggleDeluxe()" aria-label="Deluxe">⭐ Deluxe</button>
                 <button class="blog-btn" onclick="toggleBlog()" aria-label="Community">💬</button>
                 <button class="header-btn" onclick="showFavorites()" aria-label="Favorites">
                     ❤️ <span id="favCount">0</span>
@@ -123,6 +124,82 @@
                 <p class="settings-hint">Get your free API key from openrouter.ai</p>
                 <input type="password" id="apiKeyInput" class="api-key-input" placeholder="sk-or-...">
                 <button class="save-api-key-btn" onclick="saveApiKey()">Save API Key</button>
+            </div>
+        </div>
+
+        <!-- Deluxe Panel -->
+        <div class="deluxe-panel" id="deluxePanel">
+            <div class="deluxe-panel-header">
+                <h3 class="deluxe-title">⭐ Deluxe</h3>
+                <button class="deluxe-panel-close" onclick="toggleDeluxe()">✕</button>
+            </div>
+            <div class="deluxe-content" id="deluxeContent">
+                <div class="deluxe-locked" id="deluxeLocked">
+                    <div class="deluxe-icon">👑</div>
+                    <h2>Unlock Deluxe</h2>
+                    <p>Get premium features and take your cooking to the next level!</p>
+                    
+                    <div class="deluxe-price">
+                        <span class="price-amount">$10</span>
+                        <span class="price-note">(3000 PKR)</span>
+                    </div>
+                    
+                    <div class="deluxe-trial">
+                        <span class="trial-badge">🎁 FREE TRIAL</span>
+                        <span class="trial-text">Try all Deluxe features free until June 5, 2026!</span>
+                    </div>
+                    
+                    <ul class="deluxe-features">
+                        <li>🎙️ Voice Cooking Assistant</li>
+                        <li>💬 AI Chatbot (Included)</li>
+                        <li>📸 Image Recognition</li>
+                        <li>🏠 Smart Inventory</li>
+                        <li>✍️ Custom Recipe Creator</li>
+                        <li>🔍 Deep Allergy Scanner</li>
+                        <li>❤️ Health Condition Mode</li>
+                        <li>📊 Nutritional Deep Dive</li>
+                        <li>⚠️ Ingredient Safety</li>
+                        <li>📏 Recipe Scaling</li>
+                        <li>🥗 Dietary Filters</li>
+                        <li>🛒 Shopping List</li>
+                        <li>📱 Cook Mode</li>
+                        <li>📦 Meal Prep Plans</li>
+                    </ul>
+                    
+                    <button class="deluxe-try-btn" onclick="startFreeTrial()">Start Free Trial</button>
+                    <button class="deluxe-subscribe-btn" onclick="showDeluxePayment()">Subscribe Now - $10</button>
+                    
+                    <p class="deluxe-note">One-time payment, lifetime access</p>
+                </div>
+                
+                <div class="deluxe-payment" id="deluxePayment" style="display:none;">
+                    <h3>💳 Payment</h3>
+                    <p>Enter your card details to unlock Deluxe</p>
+                    
+                    <div class="payment-form">
+                        <input type="text" id="cardNumber" placeholder="Card Number (1234 5678 9012 3456)" maxlength="19">
+                        <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5">
+                        <input type="text" id="cardCvv" placeholder="CVV" maxlength="4">
+                        <input type="text" id="cardName" placeholder="Name on Card">
+                    </div>
+                    
+                    <button class="deluxe-pay-btn" onclick="processDeluxePayment()">Pay $10 (3000 PKR)</button>
+                    <button class="deluxe-back-btn" onclick="showDeluxeLocked()">← Back</button>
+                </div>
+                
+                <div class="deluxe-unlocked" id="deluxeUnlocked" style="display:none;">
+                    <div class="deluxe-check">✅</div>
+                    <h2>Deluxe Unlocked!</h2>
+                    <p>Welcome to the Deluxe experience!</p>
+                    
+                    <div class="deluxe-quick-actions">
+                        <button class="deluxe-feature-btn" onclick="toggleSmartInventory()">🏠 Smart Inventory</button>
+                        <button class="deluxe-feature-btn" onclick="openImageRecognition()">📸 Image Recognition</button>
+                        <button class="deluxe-feature-btn" onclick="openCustomRecipe()">✍️ Custom Recipe</button>
+                        <button class="deluxe-feature-btn" onclick="openAllergyScanner()">🔍 Allergy Scanner</button>
+                        <button class="deluxe-feature-btn" onclick="openHealthMode()">❤️ Health Mode</button>
+                    </div>
+                </div>
             </div>
         </div>
 
