@@ -253,11 +253,246 @@ let generatedRecipes = JSON.parse(localStorage.getItem('mealGenieGenerated') || 
 let currentGeneratedIndex = -1;
 let currentRecipe = null;
 let blogPosts = JSON.parse(localStorage.getItem('mealGenieBlog') || '[]');
+
+// ===== LANGUAGE SYSTEM =====
+const languages = [
+    { code: 'en', name: 'English', native: 'English', dir: 'ltr' },
+    { code: 'ur', name: 'Urdu', native: 'اردو', dir: 'rtl' }
+];
+
+const translations = {
+    en: {
+        appTitle: 'Meal Genie',
+        searchIng: 'Search ingredients...',
+        cuisine: 'Cuisine',
+        any: 'Any',
+        useLeftovers: 'Use Leftovers',
+        viewAll: 'View All Recipes',
+        selected: 'selected',
+        ingredients: 'Ingredients',
+        recipes: 'Recipes',
+        browse: 'Browse',
+        whatCooking: 'What are we cooking?',
+        selectIng: 'Select ingredients to discover recipes',
+        meals: 'Meals',
+        drinks: 'Drinks',
+        sauces: 'Sauces',
+        desserts: 'Desserts',
+        needIdeas: 'Need More Ideas?',
+        generateMeal: 'Generate Meal',
+        generateDrink: 'Generate Drink',
+        generateSauce: 'Generate Sauce',
+        generateDessert: 'Generate Dessert',
+        servings: 'Servings',
+        missing: 'Missing',
+        allHave: 'You have all ingredients!',
+        steps: 'Steps',
+        substitutions: 'Substitutions',
+        noSubs: 'No substitutions available',
+        saveRecipe: 'Save Recipe',
+        saved: 'Saved',
+        back: 'Back',
+        course: 'Course',
+        community: 'Community',
+        share: 'Share',
+        bug: 'Bug',
+        chat: 'Chat',
+        postTitle: 'Title...',
+        postContent: 'Share your recipe, report a bug, or just say hi!',
+        post: 'Post',
+        settings: 'Settings',
+        bgColor: 'Background Color',
+        apiKey: 'AI API Key (OpenRouter)',
+        apiHint: 'Get your free API key from openrouter.ai',
+        cookingAssistant: 'Cooking Assistant',
+        voicePowered: 'Voice-powered help',
+        askCooking: 'Ask about cooking...',
+        hiCooking: "Hi! I'm your voice cooking assistant. I can help you cook step-by-step.",
+        tryQuestion: 'Try: "How do I make scrambled eggs?"',
+        thinking: 'Thinking...',
+        letsCook: "Let's cook {recipe}! I'll guide you step by step.",
+        sayNext: 'Say "next" to continue, "repeat" to hear again, "pause" to stop.',
+        step: 'Step {num}: {text}',
+        allDone: "🎉 That's all the steps! Your dish should be ready. Enjoy your meal!",
+        paused: "Cooking guide paused. Say 'next' anytime to resume!",
+        repeatStep: "Step {num}: {text}",
+        cookingComplete: "Done! Your meal is ready! 🍽️"
+    },
+    ur: {
+        appTitle: 'میل جنی',
+        searchIng: 'اجناس تلاش کریں...',
+        cuisine: 'کھانا',
+        any: 'کوئی',
+        useLeftovers: 'بچا ہوا کھانا',
+        viewAll: 'تمام ترکیبیں دیکھیں',
+        selected: 'منتخب',
+        ingredients: 'اجناس',
+        recipes: 'ترکیبیں',
+        browse: 'دیکھیں',
+        whatCooking: 'ہم کیا پکا رہے ہیں؟',
+        selectIng: 'ترکیبیں دریافت کرنے کے لیے اجناس چنیں',
+        meals: 'کھانے',
+        drinks: 'پینے کی چیزیں',
+        sauces: 'ساس',
+        desserts: 'مٹھائی',
+        needIdeas: 'مزید خیال چاہیے؟',
+        generateMeal: 'کھانا بنائیں',
+        generateDrink: 'پینے کی چیز بنائیں',
+        generateSauce: 'ساس بنائیں',
+        generateDessert: 'مٹھائی بنائیں',
+        servings: 'کھانے کی تعداد',
+        missing: 'گم ہے',
+        allHave: 'آپ کے پاس سارے اجناس ہیں!',
+        steps: 'اقدام',
+        substitutions: 'متبادل',
+        noSubs: 'کوئی متبادل نہیں',
+        saveRecipe: 'ترکیب محفوظ کریں',
+        saved: 'محفوظ',
+        back: 'واپس',
+        course: 'قسم',
+        community: 'برادری',
+        share: 'شیئر',
+        bug: 'بگ',
+        chat: 'چیٹ',
+        postTitle: 'عنوان...',
+        postContent: 'اپنی ترکیب شیئر کریں، بگ رپورٹ کریں، یا صرف ہیلو کہیں!',
+        post: 'پوسٹ',
+        settings: 'ترتیبات',
+        bgColor: 'پس منظر کا رنگ',
+        apiKey: 'AI API کی (OpenRouter)',
+        apiHint: 'openrouter.ai سے مفت API کی لیں',
+        cookingAssistant: 'کھانے کا معاون',
+        voicePowered: 'آواز سے چلنے والا',
+        askCooking: 'کھانے کے بارے میں پوچھیں...',
+        hiCooking: "ہیلو! میں آپ کا کھانے کا معاون ہوں۔ میں آپ کو قدم بقدم پکانے میں مدد کر سکتا ہوں۔",
+        tryQuestion: 'آزمائیں: "سکریمڈ انگ کیسے بنائیں؟"',
+        thinking: 'سوچ رہا ہوں...',
+        letsCook: "چلو {recipe} پکاتے ہیں! میں آپ کو قدم بقدم بتاؤں گا۔",
+        sayNext: '"next" کہیں جاری رکھنے کے لیے، "repeat" دوبارہ سننے کے لیے، "pause" روکنے کے لیے۔',
+        step: 'اقدام {num}: {text}',
+        allDone: "🎉 سارے steps ختم ہو گئے! آپ کا کھانا تیار ہے!",
+        paused: "کھانے کا رہنما روک دیا گیا۔ کبھی بھی 'next' کہیں جاری کرنے کے لیے!",
+        repeatStep: 'اقدام {num}: {text}',
+        cookingComplete: "ہو گیا! آپ کا کھانا تیار ہے! 🍽️"
+    },
+        appTitle: 'میل جنی',
+        searchIng: 'اجناس تلاش کریں...',
+        cuisine: 'کھانا',
+        any: 'کوئی',
+        useLeftovers: 'بچا ہوا کھانا',
+        viewAll: 'تمام ترکیبیں دیکھیں',
+        selected: 'منتخب',
+        ingredients: 'اجناس',
+        recipes: 'ترکیبیں',
+        browse: 'دیکھیں',
+        whatCooking: 'ہم کیا پکا رہے ہیں؟',
+        selectIng: 'ترکیبیں دریافت کرنے کے لیے اجناس چنیں',
+        meals: 'کھانے',
+        drinks: 'پینے کی چیزیں',
+        sauces: 'ساس',
+        desserts: 'مٹھائی',
+        needIdeas: 'مزید خیال چاہیے؟',
+        generateMeal: 'کھانا بنائیں',
+        generateDrink: 'پینے کی چیز بنائیں',
+        generateSauce: 'ساس بنائیں',
+        generateDessert: 'مٹھائی بنائیں',
+        servings: 'کھانے کی تعداد',
+        missing: 'گم ہے',
+        allHave: 'آپ کے پاس سارے اجناس ہیں!',
+        steps: 'اقدام',
+        substitutions: 'متبادل',
+        noSubs: 'کوئی متبادل نہیں',
+        saveRecipe: 'ترکیب محفوظ کریں',
+        saved: 'محفوظ',
+        back: 'واپس',
+        course: 'قسم',
+        community: 'برادری',
+        share: 'شیئر',
+        bug: 'بگ',
+        chat: 'چیٹ',
+        postTitle: 'عنوان...',
+        postContent: 'اپنی ترکیب شیئر کریں، بگ رپورٹ کریں، یا صرف ہیلو کہیں!',
+        post: 'پوسٹ',
+        settings: 'ترتیبات',
+        bgColor: 'پس منظر کا رنگ',
+        apiKey: 'AI API کی (OpenRouter)',
+        apiHint: 'openrouter.ai سے مفت API کی لیں',
+        cookingAssistant: 'کھانے کا معاون',
+        voicePowered: 'آواز سے چلنے والا',
+        askCooking: 'کھانے کے بارے میں پوچھیں...',
+        hiCooking: "ہیلو! میں آپ کا کھانے کا معاون ہوں۔ میں آپ کو قدم بقدم پکانے میں مدد کر سکتا ہوں۔",
+        tryQuestion: 'آزمائیں: "سکریمڈ انگ کیسے بنائیں؟"',
+        thinking: 'سوچ رہا ہوں...'
+    }
+;
+let currentLang = localStorage.getItem('mealGenieLang') || 'en';
+
+function toggleLangMenu() {
+    const panel = document.getElementById('langPanel');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) {
+        renderLangOptions();
+        document.getElementById('blogPanel').classList.remove('open');
+        document.getElementById('settingsPanel').classList.remove('open');
+    }
+}
+
+function renderLangOptions() {
+    const container = document.getElementById('langOptions');
+    container.innerHTML = languages.map(lang => `
+        <button class="lang-option ${currentLang === lang.code ? 'active' : ''}" onclick="setLanguage('${lang.code}')">
+            <span class="lang-native">${lang.native}</span>
+            <span class="lang-name">${lang.name}</span>
+        </button>
+    `).join('');
+}
+
+function setLanguage(code) {
+    currentLang = code;
+    localStorage.setItem('mealGenieLang', code);
+    applyLanguage();
+    toggleLangMenu();
+}
+
+function applyLanguage() {
+    const t = translations[currentLang];
+    const lang = languages.find(l => l.code === currentLang);
+    
+    document.documentElement.dir = lang ? lang.dir : 'ltr';
+    
+    document.querySelector('.logo-text').textContent = t.appTitle;
+    document.getElementById('ingSearch').placeholder = t.searchIng;
+    document.querySelector('.filter-label').textContent = t.cuisine;
+    document.getElementById('leftoverBtn').textContent = t.useLeftovers;
+    document.getElementById('viewAllBtn')?.setAttribute('onclick', `showAllMeals('${t.viewAll}')`);
+    document.getElementById('navIngredients').querySelector('.nav-item-label').textContent = t.ingredients;
+    document.getElementById('navResults').querySelector('.nav-item-label').textContent = t.recipes;
+    document.getElementById('navAll').querySelector('.nav-item-label').textContent = t.browse;
+    
+    // Update chatbot welcome
+    const welcomeMsg = document.querySelector('.chatbot-welcome');
+    if (welcomeMsg) {
+        welcomeMsg.innerHTML = `<p>${t.hiCooking}</p><p class="chatbot-hint">${t.tryQuestion}</p>`;
+    }
+    
+    // Update chatbot header
+    document.querySelector('.chatbot-title').textContent = t.cookingAssistant;
+    document.querySelector('.chatbot-subtitle').textContent = t.voicePowered;
+    document.getElementById('chatbotInput').placeholder = t.askCooking;
+}
 let cookingState = {
     currentRecipe: null,
     currentStep: 0,
     isGuiding: false
 };
+
+let voiceMuted = localStorage.getItem('mealGenieMuted') === 'true';
+
+function toggleMute() {
+    voiceMuted = !voiceMuted;
+    localStorage.setItem('mealGenieMuted', voiceMuted);
+    document.getElementById('muteBtn').textContent = voiceMuted ? '🔇' : '🔊';
+}
 
 // ===== CHATBOT FUNCTIONS =====
 function toggleChatbot() {
@@ -276,6 +511,10 @@ function addChatbotMessage(text, isUser = false) {
     msg.innerHTML = `<p>${text}</p>`;
     container.appendChild(msg);
     container.scrollTop = container.scrollHeight;
+    
+    if (!isUser && !voiceMuted) {
+        speakText(text);
+    }
 }
 
 function sendChatbotMessage() {
@@ -446,36 +685,40 @@ function startCookingGuide(recipeId) {
     cookingState.currentStep = 0;
     cookingState.isGuiding = true;
     
-    addChatbotMessage(`🍳 Let's cook ${recipe.name}! I'll guide you step by step. Say "next" to continue, "repeat" to hear it again, or "pause" to stop.`);
+    const t = translations[currentLang];
+    addChatbotMessage(t.letsCook.replace('{recipe}', recipe.name) + ' ' + t.sayNext);
     provideNextStep();
 }
 
 function provideNextStep() {
     if (!cookingState.currentRecipe) return;
     
+    const t = translations[currentLang];
     const step = cookingState.currentRecipe.steps[cookingState.currentStep];
     if (!step) {
-        addChatbotMessage("🎉 That's all the steps! Your dish should be ready. Enjoy your meal!");
+        addChatbotMessage(t.allDone);
         cookingState.isGuiding = false;
         return;
     }
     
     const stepNum = cookingState.currentStep + 1;
-    addChatbotMessage(`Step ${stepNum}: ${step}`);
+    addChatbotMessage(t.step.replace('{num}', stepNum).replace('{text}', step));
     cookingState.currentStep++;
 }
 
 function repeatCurrentStep() {
     if (!cookingState.currentRecipe || cookingState.currentStep === 0) return;
+    const t = translations[currentLang];
     const step = cookingState.currentRecipe.steps[cookingState.currentStep - 1];
-    addChatbotMessage(`I said: Step ${cookingState.currentStep}: ${step}`);
+    addChatbotMessage(t.repeatStep.replace('{num}', cookingState.currentStep).replace('{text}', step));
 }
 
 function stopCookingGuide() {
+    const t = translations[currentLang];
     cookingState.isGuiding = false;
     cookingState.currentRecipe = null;
     cookingState.currentStep = 0;
-    addChatbotMessage("Cooking guide paused. Just say 'next' anytime to resume, or ask me something else!");
+    addChatbotMessage(t.paused);
 }
 
 function getOpenRouterKey() {
@@ -506,7 +749,7 @@ function startVoiceInput() {
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
+    recognition.lang = currentLang === 'ar' ? 'ar-SA' : currentLang === 'ur' ? 'ur-PK' : currentLang === 'zh' ? 'zh-CN' : currentLang;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     
@@ -526,6 +769,48 @@ function startVoiceInput() {
     
     recognition.start();
 }
+
+function speakText(text) {
+    if (!('speechSynthesis' in window)) return;
+    
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Set language for speech
+    const langMap = {
+        'en': 'en-US', 'ur': 'ur-PK', 'ar': 'ar-SA', 'hi': 'hi-IN',
+        'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE', 'tr': 'tr-TR', 'zh': 'zh-CN'
+    };
+    utterance.lang = langMap[currentLang] || 'en-US';
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    
+    window.speechSynthesis.speak(utterance);
+}
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    document.getElementById('voiceBtn').classList.add('recording');
+    
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('chatbotInput').value = transcript;
+        sendChatbotMessage();
+        document.getElementById('voiceBtn').classList.remove('recording');
+    };
+    
+    recognition.onerror = () => {
+        document.getElementById('voiceBtn').classList.remove('recording');
+        addChatbotMessage("Voice input failed. Please try again or type your question.");
+    };
+    
+    recognition.start();
+
 
 // ===== RECIPE MATCHING =====
 function getMatchingRecipes() {
@@ -1060,14 +1345,16 @@ let selectedCuisineFilter = 'all';
 let selectedTypeFilter = 'all';
 
 function showAllMeals() {
-    if (isMobile()) {
-        showAllMealsMobile();
-    } else {
-        document.getElementById('emptyState').style.display = 'none';
-        document.getElementById('recipeView').style.display = 'none';
-        document.getElementById('resultsContainer').style.display = 'none';
-        document.getElementById('allMealsView').style.display = 'block';
-    }
+    document.getElementById('searchSection').style.display = 'none';
+    document.getElementById('cuisineFilterBar').style.display = 'none';
+    document.getElementById('ingredientsGrid').style.display = 'none';
+    document.getElementById('bottomActions').style.display = 'none';
+    document.getElementById('rightPanel').classList.remove('show');
+    document.getElementById('resultsContainer').classList.remove('show');
+    document.getElementById('allMealsView').classList.add('show');
+    document.getElementById('recipeView').classList.remove('show');
+    currentMobileView = 'browse';
+    updateNavItems('navAll');
     renderAllMealsView();
 }
 
@@ -1274,9 +1561,10 @@ function showIngredients() {
     document.getElementById('cuisineFilterBar').style.display = 'block';
     document.getElementById('ingredientsGrid').style.display = 'grid';
     document.getElementById('bottomActions').style.display = 'flex';
-    document.getElementById('resultsContainer').style.display = 'none';
-    document.getElementById('allMealsView').style.display = 'none';
-    document.getElementById('recipeView').style.display = 'none';
+    document.getElementById('rightPanel').classList.remove('show');
+    document.getElementById('resultsContainer').classList.remove('show');
+    document.getElementById('allMealsView').classList.remove('show');
+    document.getElementById('recipeView').classList.remove('show');
     updateNavItems('navIngredients');
     document.getElementById('mainContent').scrollTop = 0;
 }
@@ -1289,10 +1577,10 @@ function showResults() {
         document.getElementById('cuisineFilterBar').style.display = 'none';
         document.getElementById('ingredientsGrid').style.display = 'none';
         document.getElementById('bottomActions').style.display = 'none';
-        document.getElementById('resultsContainer').style.display = 'block';
-        document.getElementById('allMealsView').style.display = 'none';
-        document.getElementById('recipeView').style.display = 'none';
-        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('rightPanel').classList.remove('show');
+        document.getElementById('resultsContainer').classList.add('show');
+        document.getElementById('allMealsView').classList.remove('show');
+        document.getElementById('recipeView').classList.remove('show');
         updateNavItems('navResults');
         document.getElementById('mainContent').scrollTop = 0;
     } else {
@@ -1398,13 +1686,17 @@ window.addEventListener('DOMContentLoaded', () => {
     updateResults();
     updateFavCount();
     checkMobileLayout();
+    applyLanguage();
+    document.getElementById('muteBtn').textContent = voiceMuted ? '🔇' : '🔊';
     
     // Close panels when clicking outside
     document.addEventListener('click', (e) => {
         const blogPanel = document.getElementById('blogPanel');
         const settingsPanel = document.getElementById('settingsPanel');
+        const langPanel = document.getElementById('langPanel');
         const blogBtn = document.querySelector('.blog-btn');
         const settingsBtn = document.querySelector('.settings-btn');
+        const langBtn = document.querySelector('.lang-btn');
         
         if (blogPanel.classList.contains('open') && 
             !blogPanel.contains(e.target) && 
@@ -1416,6 +1708,12 @@ window.addEventListener('DOMContentLoaded', () => {
             !settingsPanel.contains(e.target) && 
             !settingsBtn.contains(e.target)) {
             settingsPanel.classList.remove('open');
+        }
+        
+        if (langPanel.classList.contains('open') && 
+            !langPanel.contains(e.target) && 
+            !langBtn.contains(e.target)) {
+            langPanel.classList.remove('open');
         }
     });
     

@@ -38,6 +38,7 @@
                     ❤️ <span id="favCount">0</span>
                 </button>
                 <button class="settings-btn" onclick="toggleSettings()" aria-label="Settings">🎨</button>
+                <button class="lang-btn" onclick="toggleLangMenu()" aria-label="Language">🌐</button>
                 <button class="chatbot-btn" onclick="toggleChatbot()" aria-label="Chat">🎙️</button>
             </div>
         </header>
@@ -64,6 +65,15 @@
             <div class="blog-posts" id="blogPosts"></div>
         </div>
 
+        <!-- Language Panel -->
+        <div class="lang-panel" id="langPanel">
+            <div class="lang-panel-header">
+                <h3 class="lang-title">🌐 Language / زبان / اللغة</h3>
+                <button class="lang-panel-close" onclick="toggleLangMenu()">✕</button>
+            </div>
+            <div class="lang-options" id="langOptions"></div>
+        </div>
+
         <!-- Chatbot Panel -->
         <div class="chatbot-panel" id="chatbotPanel">
             <div class="chatbot-header">
@@ -84,6 +94,7 @@
             </div>
             <div class="chatbot-input-area">
                 <input type="text" id="chatbotInput" placeholder="Ask about cooking..." onkeypress="if(event.key==='Enter')sendChatbotMessage()">
+                <button class="chatbot-mute-btn" onclick="toggleMute()" id="muteBtn" title="Toggle voice">🔊</button>
                 <button class="chatbot-send-btn" onclick="sendChatbotMessage()">➤</button>
                 <button class="chatbot-voice-btn" onclick="startVoiceInput()" id="voiceBtn">🎤</button>
             </div>
@@ -157,6 +168,13 @@
                 </div>
             </div>
 
+            <!-- Results Container (Mobile) -->
+            <div class="results-container" id="resultsContainer"></div>
+            <div class="all-meals-view" id="allMealsView">
+                <div id="cuisineGroups"></div>
+            </div>
+            <div class="recipe-view" id="recipeView"></div>
+
             <!-- Right Panel (Desktop Only) -->
             <div class="right-panel" id="rightPanel">
                 <div class="empty-state" id="emptyState">
@@ -164,54 +182,6 @@
                     <h2>What are we cooking?</h2>
                     <p>Select ingredients to discover recipes</p>
                     <div class="selected-tags" id="selectedTags"></div>
-                </div>
-
-                <div class="results-container" id="resultsContainer"></div>
-                <div class="all-meals-view" id="allMealsView">
-                    <div id="cuisineGroups"></div>
-                </div>
-                <div class="recipe-view" id="recipeView">
-                    <div class="recipe-hero">
-                        <div class="hero-icon" id="heroIcon">🍝</div>
-                        <div class="hero-text">
-                            <span class="cuisine-badge" id="cuisineBadge">Italian</span>
-                            <h1 id="recipeName">Recipe Name</h1>
-                            <div class="hero-meta" id="heroMeta"></div>
-                        </div>
-                    </div>
-
-                    <div class="servings-bar">
-                        <span>Servings</span>
-                        <div class="serv-btns">
-                            <button class="serv-btn" onclick="setServings(1)">1x</button>
-                            <button class="serv-btn active" onclick="setServings(2)">2x</button>
-                            <button class="serv-btn" onclick="setServings(4)">4x</button>
-                        </div>
-                    </div>
-
-                    <div class="section-block">
-                        <h3 class="block-title">Ingredients</h3>
-                        <div class="ingredients-display" id="ingredientsDisplay"></div>
-                    </div>
-
-                    <div class="section-block">
-                        <h3 class="block-title">Missing</h3>
-                        <div class="missing-list" id="missingList"></div>
-                    </div>
-
-                    <div class="section-block">
-                        <h3 class="block-title">Steps</h3>
-                        <div class="steps-list" id="stepsList"></div>
-                    </div>
-
-                    <div class="section-block">
-                        <h3 class="block-title">Substitutions</h3>
-                        <div class="subs-list" id="subsList"></div>
-                    </div>
-
-                    <div class="tags-bar" id="tagsBar"></div>
-
-                    <button class="fav-btn" id="favBtn" onclick="toggleFav()">🤍 Save Recipe</button>
                 </div>
             </div>
         </main>
