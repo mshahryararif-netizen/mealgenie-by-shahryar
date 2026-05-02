@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#22C55E">
     <title>Meal Genie</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍳</text></svg>">
     <link rel="stylesheet" href="style.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Caveat:wght@500;600&display=swap');
@@ -193,11 +194,46 @@
                     <p>Welcome to the Deluxe experience!</p>
                     
                     <div class="deluxe-quick-actions">
-                        <button class="deluxe-feature-btn" onclick="toggleSmartInventory()">🏠 Smart Inventory</button>
-                        <button class="deluxe-feature-btn" onclick="openImageRecognition()">📸 Image Recognition</button>
-                        <button class="deluxe-feature-btn" onclick="openCustomRecipe()">✍️ Custom Recipe</button>
-                        <button class="deluxe-feature-btn" onclick="openAllergyScanner()">🔍 Allergy Scanner</button>
-                        <button class="deluxe-feature-btn" onclick="openHealthMode()">❤️ Health Mode</button>
+                        <button class="deluxe-feature-btn" onclick="openSmartInventory()">
+                            <span class="icon">🏠</span>
+                            Smart Inventory
+                        </button>
+                        <button class="deluxe-feature-btn" onclick="openImageRecognition()">
+                            <span class="icon">📸</span>
+                            Image Recognition
+                        </button>
+                        <button class="deluxe-feature-btn" onclick="openCustomRecipe()">
+                            <span class="icon">✍️</span>
+                            Custom Recipe
+                        </button>
+                        <button class="deluxe-feature-btn" onclick="openAllergyScanner()">
+                            <span class="icon">🔍</span>
+                            Allergy Scanner
+                        </button>
+                        <button class="deluxe-feature-btn" onclick="openHealthMode()">
+                            <span class="icon">❤️</span>
+                            Health Mode
+                        </button>
+                        <button class="deluxe-feature-btn" onclick="openNutritionalDeepDive()">
+                            <span class="icon">📊</span>
+                            Nutrition Deep Dive
+                        </button>
+                        <button class="deluxe-feature-btn" onclick="openRecipeScaling()">
+                            <span class="icon">📏</span>
+                            Recipe Scaling
+                        </button>
+                        <button class="deluxe-feature-btn" onclick="openDietaryFilters()">
+                            <span class="icon">🥗</span>
+                            Dietary Filters
+                        </button>
+                        <button class="deluxe-feature-btn" onclick="openShoppingList()">
+                            <span class="icon">🛒</span>
+                            Shopping List
+                        </button>
+                        <button class="deluxe-feature-btn" onclick="openCookMode()">
+                            <span class="icon">📱</span>
+                            Cook Mode
+                        </button>
                     </div>
                 </div>
             </div>
@@ -250,7 +286,42 @@
             <div class="all-meals-view" id="allMealsView">
                 <div id="cuisineGroups"></div>
             </div>
-            <div class="recipe-view" id="recipeView"></div>
+            <div class="recipe-view" id="recipeView">
+                <button class="back-btn" onclick="backFromRecipe()">← Back</button>
+                <div class="recipe-hero">
+                    <div class="recipe-hero-icon" id="heroIcon">🍳</div>
+                    <div class="recipe-name" id="recipeName">Recipe Name</div>
+                    <div class="recipe-badge" id="cuisineBadge">American</div>
+                    <div class="recipe-meta" id="heroMeta"></div>
+                </div>
+                <div class="servings-section">
+                    <span>Servings:</span>
+                    <div class="serv-buttons">
+                        <button class="serv-btn" onclick="setServings(1)">1</button>
+                        <button class="serv-btn active" onclick="setServings(2)">2</button>
+                        <button class="serv-btn" onclick="setServings(3)">3</button>
+                        <button class="serv-btn" onclick="setServings(4)">4</button>
+                    </div>
+                </div>
+                <div class="section">
+                    <h3>Ingredients</h3>
+                    <div class="ingredients-list" id="ingredientsDisplay"></div>
+                </div>
+                <div class="section">
+                    <h3>You May Need</h3>
+                    <div class="missing-list" id="missingList"></div>
+                </div>
+                <div class="section">
+                    <h3>Steps</h3>
+                    <div class="steps-list" id="stepsList"></div>
+                </div>
+                <div class="section">
+                    <h3>Substitutions</h3>
+                    <div class="subs-list" id="subsList"></div>
+                </div>
+                <div class="tags-bar" id="tagsBar"></div>
+                <button class="fav-btn" id="favBtn" onclick="">🤍 Save Recipe</button>
+            </div>
 
             <!-- Right Panel (Desktop Only) -->
             <div class="right-panel" id="rightPanel">
