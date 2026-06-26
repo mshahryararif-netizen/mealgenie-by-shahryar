@@ -7,43 +7,77 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// Application user synced from Clerk (auth handled by Clerk, not custom logic).
+/// Synced from Clerk — Clerk is the identity source of truth; no passwords stored here.
 model User {
-  id            String         @id @default(cuid())
-  clerkId       String         @unique
-  email         String         @unique
-  firstName     String?
-  lastName      String?
-  imageUrl      String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  favorites     Favorite[]
-  conversations Conversation[]
-  mealPlans     MealPlan[]
-  savedRecipes  SavedRecipe[]
-  preferences   Preferences?
+  id              String           @id @default(cuid())
+  clerkUserId     String           @unique @map("clerk_user_id")
+  email           String           @unique
+  firstName       String?
+  lastName        String?
+  imageUrl        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  favorites       Favorite[]
+  savedRecipes    SavedRecipe[]
+  conversations   Conversation[]
+  mealPlans       MealPlan[]
+  userPreference  UserPreference?
+
+  @@map("users")
 }
 
 model Recipe {
-  id           String        @id @default(cuid())
-  externalId   Int?
-  source       RecipeSource  @default(LOCAL)
-  name         String
-  type         String
-  cuisine      String?
-  timeMinutes  Int?
-  difficulty   String?
-  calories     Int?
-  icon         String?
-  payload      Json?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  favorites    Favorite[]
-  savedRecipes SavedRecipe[]
-  mealPlans    MealPlan[]
+  id                String             @id @default(cuid())
+  externalId        Int?
+  source            RecipeSource       @default(LOCAL)
+  name              String
+  type              String
+  cuisine           String?
+  timeMinutes       Int?
+  difficulty        String?
+  calories          Int?
+  icon              String?
+  payload           Json?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  favorites         Favorite[]
+  savedRecipes      SavedRecipe[]
+  recipeIngredients RecipeIngredient[]
+  mealPlanRecipes   MealPlanRecipe[]
 
   @@index([source, externalId])
   @@index([type])
+  @@map("recipes")
+}
+
+/// Catalog ingredient (distinct from in-app ingredient chip ids until synced).
+model Ingredient {
+  id                String             @id @default(cuid())
+  externalKey       String             @unique
+  name              String
+  icon              String?
+  category          String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  recipeIngredients RecipeIngredient[]
+
+  @@index([category])
+  @@map("ingredients")
+}
+
+model RecipeIngredient {
+  id           String     @id @default(cuid())
+  recipeId     String
+  ingredientId String
+  amount       String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, ingredientId])
+  @@index([ingredientId])
+  @@map("recipe_ingredients")
 }
 
 model Favorite {
@@ -51,11 +85,13 @@ model Favorite {
   userId    String
   recipeId  String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, recipeId])
   @@index([userId])
+  @@map("favorites")
 }
 
 model SavedRecipe {
@@ -70,6 +106,7 @@ model SavedRecipe {
 
   @@unique([userId, recipeId])
   @@index([userId])
+  @@map("saved_recipes")
 }
 
 model Conversation {
@@ -82,25 +119,41 @@ model Conversation {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@map("conversations")
 }
 
 model MealPlan {
-  id        String    @id @default(cuid())
-  userId    String
-  recipeId  String?
-  name      String
-  planDate  DateTime?
-  mealType  MealType?
-  payload   Json?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipe    Recipe?   @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+  id              String           @id @default(cuid())
+  userId          String
+  name            String
+  planDate        DateTime?
+  mealType        MealType?
+  payload         Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mealPlanRecipes MealPlanRecipe[]
 
   @@index([userId, planDate])
+  @@map("meal_plans")
 }
 
-model Preferences {
+model MealPlanRecipe {
+  id         String   @id @default(cuid())
+  mealPlanId String
+  recipeId   String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([mealPlanId, recipeId])
+  @@index([recipeId])
+  @@map("meal_plan_recipes")
+}
+
+model UserPreference {
   id              String   @id @default(cuid())
   userId          String   @unique
   language        String   @default("en")
@@ -110,6 +163,8 @@ model Preferences {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
 }
 
 enum RecipeSource {
@@ -125,3 +180,6 @@ enum MealType {
   SNACK
   DRINK
 }
+
+// Future-ready (not migrated yet): GroceryList, GroceryItem, Pantry, PantryItem,
+// NutritionProfile, ShoppingHistory — add when features are implemented.
