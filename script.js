@@ -253,6 +253,34 @@ const SPOON_LIST_TTL = 24 * 60 * 60 * 1000;
 let spoonacularRecipes = [];
 let spoonacularLoading = false;
 let spoonacularFetchTimer = null;
+let serverServices = { openrouter: false, spoonacular: false };
+
+async function loadServerServices() {
+    try {
+        const res = await fetch('/api/services/status');
+        if (res.ok) {
+            serverServices = await res.json();
+        }
+    } catch (_) {}
+}
+
+function isOpenRouterAvailable() {
+    return Boolean(serverServices.openrouter);
+}
+
+function isSpoonacularAvailable() {
+    return Boolean(serverServices.spoonacular);
+}
+
+async function callOpenRouterAPI(body) {
+    const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new Error('API error');
+    return response.json();
+}
 let currentRecipe = null;
 let spotlightRecipeIds = [];
 let blogPosts = JSON.parse(localStorage.getItem('mealGenieBlog') || '[]');
@@ -331,17 +359,18 @@ const translations = {
         settings: 'Settings',
         bgColor: 'Background Color',
         apiKey: 'AI API Key (OpenRouter)',
-        apiHint: 'Get your free API key from openrouter.ai',
+        apiHint: 'AI is configured on the server — no key needed here.',
         spoonacularKey: 'Verified Recipes API (Spoonacular)',
-        spoonacularHint: 'Free key at spoonacular.com/food-api — real recipes from trusted sources',
+        spoonacularHint: 'Verified recipes are configured on the server — no key needed here.',
         saveSpoonacularKey: 'Save Recipe API Key',
         spoonacularSaved: 'Spoonacular key saved! Authentic verified recipes enabled.',
+        spoonacularServerManaged: 'Verified recipes are configured on the server. No API key is needed in the app.',
         verifiedBadge: '✓ Verified',
         verifiedRecipes: 'Verified Recipes',
         loadingRecipe: 'Loading authentic recipe...',
         viewSource: 'View original recipe',
         authenticSource: 'Authentic recipe verified via Spoonacular',
-        spoonacularRequired: 'Add your free Spoonacular API key in Settings for 100% verified recipes.',
+        spoonacularRequired: 'Verified recipes are not available right now. Ask your administrator to configure the server.',
         cookingAssistant: 'Cooking Assistant',
         voicePowered: 'Voice-powered help',
         askCooking: 'Ask about cooking...',
@@ -363,6 +392,7 @@ const translations = {
         saveApiKey: 'Save API Key',
         apiKeySaved: 'API key saved successfully!',
         apiKeyInvalid: 'Please enter a valid API key.',
+        apiKeyServerManaged: 'AI is configured on the server. No API key is needed in the app.',
         emptyTitle: 'What are we cooking?',
         emptySub: 'Select ingredients to discover recipes',
         recipeIngredients: 'Ingredients',
@@ -526,17 +556,18 @@ const translations = {
         settings: 'ترتیبات',
         bgColor: 'پس منظر کا رنگ',
         apiKey: 'AI API کی (OpenRouter)',
-        apiHint: 'openrouter.ai سے مفت API کی لیں',
+        apiHint: 'AI سرور پر ترتیب ہے — یہاں key کی ضرورت نہیں۔',
         spoonacularKey: 'تصدیق شدہ ترکیبیں API (Spoonacular)',
-        spoonacularHint: 'spoonacular.com/food-api سے مفت کی — اصل ترکیبیں',
+        spoonacularHint: 'تصدیق شدہ ترکیبیں سرور پر ترتیب ہیں — یہاں key کی ضرورت نہیں۔',
         saveSpoonacularKey: 'Recipe API Key محفوظ کریں',
         spoonacularSaved: 'Spoonacular key محفوظ! تصدیق شدہ ترکیبیں فعال۔',
+        spoonacularServerManaged: 'تصدیق شدہ ترکیبیں سرور پر ترتیب ہیں۔ ایپ میں API key کی ضرورت نہیں۔',
         verifiedBadge: '✓ تصدیق شدہ',
         verifiedRecipes: 'تصدیق شدہ ترکیبیں',
         loadingRecipe: 'اصل ترکیب لوڈ ہو رہی ہے...',
         viewSource: 'اصل ترکیب دیکھیں',
         authenticSource: 'Spoonacular سے تصدیق شدہ اصل ترکیب',
-        spoonacularRequired: '100% تصدیق شدہ ترکیبوں کے لیے Settings میں Spoonacular API key شامل کریں۔',
+        spoonacularRequired: 'تصدیق شدہ ترکیبیں اب دستیاب نہیں۔ سرور کی ترتیب کے لیے منتظم سے رابطہ کریں۔',
         cookingAssistant: 'کھانے کا معاون',
         voicePowered: 'آواز سے چلنے والا',
         askCooking: 'کھانے کے بارے میں پوچھیں...',
@@ -558,6 +589,7 @@ const translations = {
         saveApiKey: 'API کی محفوظ کریں',
         apiKeySaved: 'API کی محفوظ ہو گئی!',
         apiKeyInvalid: 'براہ کرم درست API کی درج کریں۔',
+        apiKeyServerManaged: 'AI سرور پر ترتیب ہے۔ ایپ میں API key کی ضرورت نہیں۔',
         emptyTitle: 'ہم کیا پکا رہے ہیں؟',
         emptySub: 'ترکیبیں دریافت کرنے کے لیے اجناس چنیں',
         recipeIngredients: 'اجناس',
@@ -962,9 +994,7 @@ async function processChatbotMessage(message) {
 }
 
 async function getAIResponse(message) {
-    const hasApiKey = getOpenRouterKey();
-    
-    if (hasApiKey) {
+    if (isOpenRouterAvailable()) {
         await getAIResponseOnline(message);
     } else {
         getLocalResponse(message);
@@ -1066,27 +1096,14 @@ async function getAIResponseOnline(message) {
 ${langInstruction}`;
 
     try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getOpenRouterKey(),
-                'HTTP-Referer': window.location.href,
-                'X-Title': 'MealGenie Cooking Assistant'
-            },
-            body: JSON.stringify({
-                model: 'anthropic/claude-3-haiku',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: message }
-                ],
-                max_tokens: 300
-            })
+        const data = await callOpenRouterAPI({
+            model: 'anthropic/claude-3-haiku',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: message }
+            ],
+            max_tokens: 300
         });
-        
-        if (!response.ok) throw new Error('API error');
-        
-        const data = await response.json();
         const botMsg = data.choices[0].message.content;
         
         document.querySelector('#chatbotMessages .chat-msg-bot:last-child')?.remove();
@@ -1154,40 +1171,14 @@ function stopCookingGuide() {
     addChatbotMessage(tr('paused'));
 }
 
-function getOpenRouterKey() {
-    return localStorage.getItem('mealGenieOpenRouterKey') || '';
-}
-
-function setOpenRouterKey(key) {
-    localStorage.setItem('mealGenieOpenRouterKey', key);
-    addChatbotMessage(tr('apiKeySavedChat'));
-}
-
 function saveApiKey() {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    if (key) {
-        setOpenRouterKey(key);
-        document.getElementById('apiKeyInput').value = '';
-        alert(tr('apiKeySavedMsg'));
-    } else {
-        alert(tr('apiKeyInvalid'));
-    }
-}
-
-function getSpoonacularKey() {
-    return localStorage.getItem('mealGenieSpoonacularKey') || '';
+    document.getElementById('apiKeyInput').value = '';
+    alert(tr('apiKeyServerManaged'));
 }
 
 function saveSpoonacularKey() {
-    const key = document.getElementById('spoonacularKeyInput').value.trim();
-    if (key) {
-        localStorage.setItem('mealGenieSpoonacularKey', key);
-        document.getElementById('spoonacularKeyInput').value = '';
-        alert(tr('spoonacularSaved'));
-        if (selectedIngredients.length > 0) scheduleSpoonacularFetch(true);
-    } else {
-        alert(tr('apiKeyInvalid'));
-    }
+    document.getElementById('spoonacularKeyInput').value = '';
+    alert(tr('spoonacularServerManaged'));
 }
 
 function getAllRecipes() {
@@ -1328,12 +1319,11 @@ async function loadSpoonacularRecipeDetails(spoonacularId) {
         return cached;
     }
 
-    const key = getSpoonacularKey();
-    if (!key) return cached || null;
+    if (!isSpoonacularAvailable()) return cached || null;
 
     try {
         const res = await fetch(
-            `https://api.spoonacular.com/recipes/${spoonacularId}/information?includeNutrition=true&apiKey=${encodeURIComponent(key)}`
+            `/api/recipes/${encodeURIComponent(spoonacularId)}?includeNutrition=true`
         );
         if (!res.ok) return cached || null;
         const data = await res.json();
@@ -1349,7 +1339,7 @@ async function loadSpoonacularRecipeDetails(spoonacularId) {
 
 function scheduleSpoonacularFetch(immediate = false) {
     clearTimeout(spoonacularFetchTimer);
-    if (!getSpoonacularKey() || selectedIngredients.length === 0) {
+    if (!isSpoonacularAvailable() || selectedIngredients.length === 0) {
         spoonacularRecipes = [];
         return;
     }
@@ -1357,8 +1347,7 @@ function scheduleSpoonacularFetch(immediate = false) {
 }
 
 async function refreshSpoonacularRecipes() {
-    const key = getSpoonacularKey();
-    if (!key || selectedIngredients.length === 0) {
+    if (!isSpoonacularAvailable() || selectedIngredients.length === 0) {
         spoonacularRecipes = [];
         spoonacularLoading = false;
         return;
@@ -1384,7 +1373,7 @@ async function refreshSpoonacularRecipes() {
     const ingredientsParam = names.join(',');
 
     try {
-        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${encodeURIComponent(ingredientsParam)}&number=12&ranking=1&ignorePantry=true&apiKey=${encodeURIComponent(key)}`;
+        const url = `/api/recipes/search?ingredients=${encodeURIComponent(ingredientsParam)}&number=12`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('Spoonacular API error');
         const data = await res.json();
@@ -1819,26 +1808,15 @@ JSON shape:
 {"name":"string","icon":"single emoji","time":number,"difficulty":"Easy|Medium|Hard","calories":number,"cuisine":"string","ingredients":[{"name":"string","amount":"string"}],"steps":["string"],"substitutions":[{"from":"string","to":"string"}]}`;
 
     try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getOpenRouterKey(),
-                'HTTP-Referer': window.location.href,
-                'X-Title': 'MealGenie Recipe Generator'
-            },
-            body: JSON.stringify({
-                model: 'anthropic/claude-3-haiku',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                max_tokens: 900,
-                temperature: 0.4
-            })
+        const data = await callOpenRouterAPI({
+            model: 'anthropic/claude-3-haiku',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+            ],
+            max_tokens: 900,
+            temperature: 0.4
         });
-        if (!response.ok) return null;
-        const data = await response.json();
         const raw = data.choices?.[0]?.message?.content || '';
         const match = raw.match(/\{[\s\S]*\}/);
         if (!match) return null;
@@ -1874,7 +1852,7 @@ async function generateSmartRecipe(type = 'meal') {
         return null;
     }
 
-    if (getSpoonacularKey()) {
+    if (isSpoonacularAvailable()) {
         await refreshSpoonacularRecipes();
         const verified = spoonacularRecipes.filter(r => r.type === type);
         const pick = verified[0] || (type === 'meal' ? spoonacularRecipes[0] : null);
@@ -1884,7 +1862,7 @@ async function generateSmartRecipe(type = 'meal') {
         }
     }
 
-    if (getOpenRouterKey()) {
+    if (isOpenRouterAvailable()) {
         const online = await fetchAIRecipe(type);
         if (online) {
             generatedRecipes.push(online);
@@ -1991,12 +1969,12 @@ function updateResults() {
 
     if (!hasMatch && selectedIngredients.length > 0) {
         html += `<div class="no-match-msg"><p>${tr('noExactMatch')}</p></div>`;
-        if (!getSpoonacularKey()) {
+        if (!isSpoonacularAvailable()) {
             html += `<div class="no-match-msg"><p>${tr('spoonacularRequired')}</p></div>`;
         }
     }
 
-    if (spoonacularLoading && getSpoonacularKey()) {
+    if (spoonacularLoading && isSpoonacularAvailable()) {
         html += `<div class="spoon-loading">${tr('loadingRecipe')}</div>`;
     }
     
@@ -2176,7 +2154,7 @@ function showRecipe(id) {
 
 async function showRecipeAsync(id) {
     let recipe = getRecipeById(id);
-    if (!recipe && id >= SPOONACULAR_ID_OFFSET && getSpoonacularKey()) {
+    if (!recipe && id >= SPOONACULAR_ID_OFFSET && isSpoonacularAvailable()) {
         recipe = await loadSpoonacularRecipeDetails(id - SPOONACULAR_ID_OFFSET);
     }
     if (!recipe) return;
@@ -2777,32 +2755,20 @@ async function scanFridgeImage() {
 }
 
 async function detectFridgeIngredients(imageData) {
-    const apiKey = getOpenRouterKey();
     const catalogNames = ingredients.map(i => i.name).slice(0, 80).join(', ');
-    if (!apiKey) return simulateFridgeDetection();
+    if (!isOpenRouterAvailable()) return simulateFridgeDetection();
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiKey,
-            'HTTP-Referer': window.location.href,
-            'X-Title': 'MealGenie Fridge Scan'
-        },
-        body: JSON.stringify({
-            model: 'google/gemini-2.0-flash-001',
-            messages: [{
-                role: 'user',
-                content: [
-                    { type: 'text', text: `You see a fridge photo. List visible food ingredients ONLY from this catalog when possible: ${catalogNames}. Return JSON array of lowercase ingredient id strings matching catalog ids (use hyphens like bell-pepper). No markdown.` },
-                    { type: 'image_url', image_url: { url: imageData } }
-                ]
-            }],
-            max_tokens: 300
-        })
+    const data = await callOpenRouterAPI({
+        model: 'google/gemini-2.0-flash-001',
+        messages: [{
+            role: 'user',
+            content: [
+                { type: 'text', text: `You see a fridge photo. List visible food ingredients ONLY from this catalog when possible: ${catalogNames}. Return JSON array of lowercase ingredient id strings matching catalog ids (use hyphens like bell-pepper). No markdown.` },
+                { type: 'image_url', image_url: { url: imageData } }
+            ]
+        }],
+        max_tokens: 300
     });
-    if (!response.ok) throw new Error('vision failed');
-    const data = await response.json();
     const raw = data.choices?.[0]?.message?.content || '[]';
     const match = raw.match(/\[[\s\S]*\]/);
     if (!match) return simulateFridgeDetection();
@@ -2873,7 +2839,7 @@ async function generateFridgeMenu() {
     const prefs = fridgeState.prefs;
 
     let aiMenu = null;
-    if (getOpenRouterKey()) {
+    if (isOpenRouterAvailable()) {
         aiMenu = await fetchFridgeMenuAI(names, prefs, matches);
     }
     if (!aiMenu) {
@@ -2899,25 +2865,14 @@ function buildLocalFridgeMenu(matches, names, prefs) {
 
 async function fetchFridgeMenuAI(names, prefs, matches) {
     try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getOpenRouterKey(),
-                'HTTP-Referer': window.location.href,
-                'X-Title': 'MealGenie Fridge Menu'
-            },
-            body: JSON.stringify({
-                model: 'anthropic/claude-3-haiku',
-                messages: [{
-                    role: 'user',
-                    content: `User fridge: ${names.join(', ')}. Mood: ${prefs.mood}, budget: ${prefs.budget}, usage: ${prefs.usage}, servings: ${prefs.servings}. Suggest meal, drink, optional sauce. JSON only: {"meal":{"name":"","tip":""},"drink":{"name":""},"sauce":{"name":""}|null,"youtubeQuery":""}`
-                }],
-                max_tokens: 400
-            })
+        const data = await callOpenRouterAPI({
+            model: 'anthropic/claude-3-haiku',
+            messages: [{
+                role: 'user',
+                content: `User fridge: ${names.join(', ')}. Mood: ${prefs.mood}, budget: ${prefs.budget}, usage: ${prefs.usage}, servings: ${prefs.servings}. Suggest meal, drink, optional sauce. JSON only: {"meal":{"name":"","tip":""},"drink":{"name":""},"sauce":{"name":""}|null,"youtubeQuery":""}`
+            }],
+            max_tokens: 400
         });
-        if (!response.ok) return null;
-        const data = await response.json();
         const raw = data.choices?.[0]?.message?.content || '';
         const match = raw.match(/\{[\s\S]*\}/);
         if (!match) return null;
@@ -3164,37 +3119,25 @@ async function liveMentorFix(problem) {
     liveMentorSpeak('Analyzing... hang on chef.');
 
     const localFix = getLocalMentorFix(problem, currentStep);
-    if (localFix && !getOpenRouterKey()) {
+    if (localFix && !isOpenRouterAvailable()) {
         liveMentorSpeak(localFix);
         return;
     }
-    if (getOpenRouterKey()) {
+    if (isOpenRouterAvailable()) {
         try {
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + getOpenRouterKey(),
-                    'HTTP-Referer': window.location.href,
-                    'X-Title': 'MealGenie Live Mentor'
-                },
-                body: JSON.stringify({
-                    model: 'anthropic/claude-3-haiku',
-                    messages: [{
-                        role: 'system',
-                        content: 'You are a friendly robotic cooking mentor. User made a mistake. Give 2-3 short actionable fixes. Be encouraging, not robotic-stiff. Max 3 sentences.'
-                    }, {
-                        role: 'user',
-                        content: `Recipe: ${recipe.name}. Current step: ${currentStep}. Problem: ${problem}`
-                    }],
-                    max_tokens: 200
-                })
+            const data = await callOpenRouterAPI({
+                model: 'anthropic/claude-3-haiku',
+                messages: [{
+                    role: 'system',
+                    content: 'You are a friendly robotic cooking mentor. User made a mistake. Give 2-3 short actionable fixes. Be encouraging, not robotic-stiff. Max 3 sentences.'
+                }, {
+                    role: 'user',
+                    content: `Recipe: ${recipe.name}. Current step: ${currentStep}. Problem: ${problem}`
+                }],
+                max_tokens: 200
             });
-            if (response.ok) {
-                const data = await response.json();
-                liveMentorSpeak(data.choices[0].message.content.trim());
-                return;
-            }
+            liveMentorSpeak(data.choices[0].message.content.trim());
+            return;
         } catch (_) {}
     }
     liveMentorSpeak(localFix || "No worries chef — taste, adjust seasoning, and lower the heat. You’ve got this!");
@@ -3439,6 +3382,10 @@ function setupSwipeNavigation() {
 
 // ===== INIT =====
 window.addEventListener('DOMContentLoaded', () => {
+    loadServerServices().then(() => {
+        if (selectedIngredients.length > 0) scheduleSpoonacularFetch(true);
+        updateResults();
+    });
     renderIngredients();
     loadBgColor();
     hydrateSpoonacularFavorites();

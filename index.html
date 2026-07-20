@@ -123,14 +123,19 @@
                 <button class="color-option" style="background:#FFFFFF;" data-color="#FFFFFF" onclick="setBgColor('#FFFFFF')"></button>
             </div>
             <div class="settings-section" style="margin-top: 24px;">
+                <h4 class="settings-section-title" id="settingsDownloadTitle">Get Meal Genie on Android</h4>
+                <p class="settings-hint" id="downloadAppHint">Install the app on your phone — same logo, full experience.</p>
+                <button class="save-api-key-btn" id="downloadAppBtn" onclick="downloadMealGenieApp()">Download Meal Genie</button>
+            </div>
+            <div class="settings-section" style="margin-top: 24px;">
                 <h4 class="settings-section-title" id="settingsSpoonacularTitle">Verified Recipes API (Spoonacular)</h4>
-                <p class="settings-hint" id="spoonacularHint">Free key at spoonacular.com/food-api — real recipes from trusted sources</p>
+                <p class="settings-hint" id="spoonacularHint">Verified recipes are configured on the server — no key needed here.</p>
                 <input type="password" id="spoonacularKeyInput" class="api-key-input" placeholder="Your Spoonacular API key">
                 <button class="save-api-key-btn" id="saveSpoonacularBtn" onclick="saveSpoonacularKey()">Save Recipe API Key</button>
             </div>
             <div class="settings-section" style="margin-top: 24px;">
                 <h4 class="settings-section-title" id="settingsOpenRouterTitle">AI API Key (OpenRouter)</h4>
-                <p class="settings-hint" id="openRouterHint">Get your free API key from openrouter.ai</p>
+                <p class="settings-hint" id="openRouterHint">AI is configured on the server — no key needed here.</p>
                 <input type="password" id="apiKeyInput" class="api-key-input" placeholder="sk-or-...">
                 <button class="save-api-key-btn" id="saveOpenRouterBtn" onclick="saveApiKey()">Save API Key</button>
             </div>

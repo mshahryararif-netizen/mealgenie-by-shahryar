@@ -16,9 +16,9 @@ export default function SignInPage() {
   return (
     <AuthShell
       title="Sign in"
-      subtitle="Welcome back to Meal Genie"
-      footerHref="/"
-      footerLabel="← Back to Meal Genie"
+      subtitle="Sign in to use Meal Genie"
+      footerHref="/sign-up"
+      footerLabel="Don't have an account? Sign up"
     >
       <SignInForm />
     </AuthShell>

@@ -1,6 +1,5 @@
-/** Routes accessible without signing in. The main app stays public for pixel-perfect parity. */
+/** Routes accessible without signing in. Everything else requires Clerk auth. */
 export const PUBLIC_ROUTES = [
-  '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
 ] as const;

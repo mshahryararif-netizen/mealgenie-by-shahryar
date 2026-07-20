@@ -1,0 +1,93 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #000;
+  color: #fff;
+}
+
+.card {
+  width: min(100%, 420px);
+  text-align: center;
+  padding: 32px 24px;
+  border-radius: 24px;
+  border: 2px solid #ff8c00;
+  background: #111;
+}
+
+.logo {
+  border-radius: 28px;
+  margin: 0 auto 16px;
+  display: block;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+}
+
+.tagline {
+  margin: 0 0 24px;
+  color: #8db600;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.downloadBtn {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: 999px;
+  background: #8db600;
+  color: #000;
+  font-weight: 700;
+  text-decoration: none;
+  margin-bottom: 24px;
+}
+
+.downloadBtn:hover {
+  background: #a3d018;
+}
+
+.pending {
+  text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #ddd;
+  margin-bottom: 24px;
+}
+
+.steps {
+  text-align: left;
+  margin-top: 8px;
+}
+
+.steps h2 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.steps ol {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.note {
+  font-size: 0.9rem;
+  color: #bbb;
+  line-height: 1.5;
+}
+
+.backLink {
+  display: inline-block;
+  margin-top: 24px;
+  color: #ff8c00;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}

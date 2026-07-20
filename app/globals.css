@@ -1701,6 +1701,9 @@ body.lang-ur .chatbot-icon {
     text-align: center;
     margin-bottom: 6px;
     line-height: 1.3;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
 }
 
 .result-meta {
@@ -1717,6 +1720,41 @@ body.lang-ur .chatbot-icon {
     color: var(--green);
     font-weight: 600;
     margin-top: 4px;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+
+.result-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 0 4px 8px;
+}
+
+.result-page-btn {
+    padding: 10px 14px;
+    border: 2px solid var(--green);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.result-page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.result-page-indicator {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-light);
 }
 
 .custom-badge {
@@ -1741,6 +1779,10 @@ body.lang-ur .chatbot-icon {
     font-weight: 700;
     padding: 3px 8px;
     border-radius: 50px;
+    max-width: calc(100% - 16px);
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
 }
 
 .result-card.verified {
@@ -1765,6 +1807,8 @@ body.lang-ur .chatbot-icon {
     display: block;
     font-size: 11px;
     color: var(--text-light);
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .spoon-loading, .loading-recipe {
@@ -1840,6 +1884,8 @@ body.lang-ur .chatbot-icon {
     padding: 24px;
     margin-bottom: 16px;
     text-align: center;
+    overflow: hidden;
+    max-width: 100%;
 }
 
 .hero-icon, .recipe-hero-icon { font-size: 64px; }
@@ -1861,6 +1907,10 @@ body.lang-ur .chatbot-icon {
     font-family: 'Caveat', cursive;
     font-size: 28px;
     margin: 10px 0;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
 }
 
 .hero-meta, .recipe-meta {
@@ -1871,6 +1921,7 @@ body.lang-ur .chatbot-icon {
     font-size: 13px;
     color: var(--text-light);
     margin-top: 10px;
+    max-width: 100%;
 }
 
 .leftover-badge {
@@ -1994,17 +2045,33 @@ body.lang-ur .chatbot-icon {
 
 .ing-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     padding: 14px;
     background: var(--bg);
     border-radius: var(--radius-xs);
     min-height: 48px;
+    flex-wrap: wrap;
 }
 
 .ing-icon-small { font-size: 20px; }
-.ing-text { flex: 1; font-size: 15px; }
-.ing-qty { font-size: 14px; color: var(--green); font-weight: 600; white-space: nowrap; }
+.ing-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+.ing-qty {
+    font-size: 14px;
+    color: var(--green);
+    font-weight: 600;
+    white-space: normal;
+    text-align: right;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
 
 /* ===== MISSING LIST ===== */
 .missing-list { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -2022,7 +2089,12 @@ body.lang-ur .chatbot-icon {
 }
 
 .all-have { color: var(--green); font-weight: 600; font-size: 14px; }
-.ai-note { color: #D97706; font-style: italic; }
+.ai-note {
+    color: #D97706;
+    font-style: italic;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
 .no-subs { color: var(--text-light); font-size: 14px; }
 
 /* ===== STEPS ===== */
@@ -2034,6 +2106,7 @@ body.lang-ur .chatbot-icon {
     padding: 16px;
     background: var(--bg);
     border-radius: var(--radius-sm);
+    align-items: flex-start;
 }
 
 .step-num {
@@ -2050,7 +2123,14 @@ body.lang-ur .chatbot-icon {
     font-size: 14px;
 }
 
-.step-text { font-size: 15px; line-height: 1.6; }
+.step-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
 
 /* ===== SUBS ===== */
 .subs-list { display: flex; flex-direction: column; gap: 10px; }
