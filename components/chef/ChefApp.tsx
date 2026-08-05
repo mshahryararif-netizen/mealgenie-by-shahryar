@@ -132,8 +132,8 @@ export default function ChefApp() {
               <div className={styles.heroEyebrow}>Jarvis for cooking</div>
               <h1>What are we cooking tonight?</h1>
               <p>
-                Tell me how you want to cook. I’ll personalize recipes, protect your
-                allergies, and coach you through the kitchen.
+                Tell me how you want to cook. Scan your fridge, personalize recipes, and cook with
+                voice coaching.
               </p>
             </div>
             <div className={styles.modeGrid}>
@@ -159,7 +159,7 @@ export default function ChefApp() {
               >
                 <div className={styles.modeIcon}>🥡</div>
                 <h2>Cook with Leftovers</h2>
-                <p>Type, speak, or tap ingredients. I’ll minimize waste and fill the gaps.</p>
+                <p>Type, speak, scan your fridge, or tap ingredients. I’ll minimize waste and fill the gaps.</p>
               </button>
             </div>
           </section>

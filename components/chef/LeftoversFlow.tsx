@@ -2,10 +2,11 @@
 
 import { useMemo, useRef, useState } from 'react';
 import styles from '@/components/chef/chef.module.css';
+import { FridgeScanPanel } from '@/components/chef/FridgeScanPanel';
 import { CATALOG_INGREDIENTS, INGREDIENT_CATEGORIES } from '@/lib/chef/ingredients';
 import type { LeftoversInput, UserTasteMemory } from '@/lib/chef/types';
 
-type Tab = 'type' | 'voice' | 'chips' | 'photo';
+type Tab = 'photo' | 'chips' | 'type' | 'voice';
 
 type Props = {
   memory: UserTasteMemory;
@@ -14,7 +15,7 @@ type Props = {
 };
 
 export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
-  const [tab, setTab] = useState<Tab>('chips');
+  const [tab, setTab] = useState<Tab>('photo');
   const [selected, setSelected] = useState<string[]>([]);
   const [typed, setTyped] = useState('');
   const [listening, setListening] = useState(false);
@@ -32,13 +33,17 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
     );
   }
 
+  function mergeIngredients(names: string[]) {
+    setSelected((prev) => Array.from(new Set([...prev, ...names])));
+  }
+
   function addTypedIngredients() {
     const parts = typed
       .split(/,|\n/)
       .map((p) => p.trim())
       .filter(Boolean);
     if (!parts.length) return;
-    setSelected((prev) => Array.from(new Set([...prev, ...parts])));
+    mergeIngredients(parts);
     setTyped('');
   }
 
@@ -67,7 +72,7 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
         .split(/,| and /i)
         .map((p) => p.trim())
         .filter(Boolean);
-      setSelected((prev) => Array.from(new Set([...prev, ...parts])));
+      mergeIngredients(parts);
       setVoiceStatus(`Got it: ${transcript}`);
     };
 
@@ -95,7 +100,7 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
       <div className={styles.panelHeader}>
         <div>
           <h2>Cook with Leftovers</h2>
-          <p>Use what you already have. I’ll suggest smart fills for the gaps.</p>
+          <p>Scan your fridge, or add ingredients by voice, typing, or chips.</p>
         </div>
         <button type="button" className={styles.ghostBtn} onClick={onBack}>
           Back
@@ -107,17 +112,17 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
         <div>
           {selected.length
             ? `Nice — ${selected.length} ingredient${selected.length === 1 ? '' : 's'} locked in.`
-            : 'Add ingredients by typing, voice, or the classic chip picker.'}
+            : 'Start with Scan My Fridge, or pick another input method.'}
         </div>
       </div>
 
       <div className={styles.tabs} role="tablist" aria-label="Ingredient input method">
         {(
           [
+            ['photo', 'Scan fridge'],
             ['chips', 'Select chips'],
             ['type', 'Type'],
             ['voice', 'Voice'],
-            ['photo', 'Photo'],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -133,6 +138,15 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
           </button>
         ))}
       </div>
+
+      {tab === 'photo' && (
+        <FridgeScanPanel
+          onSwitchToManual={() => setTab('type')}
+          onIngredientsConfirmed={(names) => {
+            mergeIngredients(names);
+          }}
+        />
+      )}
 
       {tab === 'type' && (
         <div>
@@ -187,13 +201,6 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {tab === 'photo' && (
-        <div className={styles.futureNote}>
-          Fridge photo recognition is next. For now, use chips, typing, or voice — same pantry
-          inventory architecture is ready for camera upload later.
         </div>
       )}
 
