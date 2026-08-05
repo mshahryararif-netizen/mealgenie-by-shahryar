@@ -5,24 +5,14 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'MealGenie — AI Personal Chef',
-  description: 'Jarvis for cooking. Personalized recipes, leftovers magic, and voice coaching.',
+  title: 'Meal Genie',
+  description: 'Turn what’s in your kitchen into creative meal ideas — instantly.',
   openGraph: {
-    title: 'MealGenie — AI Personal Chef',
-    description: 'Scan your fridge, plan meals, track nutrition, and cook with voice coaching.',
+    title: 'Meal Genie',
+    description: 'Scan your fridge, plan meals, and cook smarter.',
     url: SITE_URL,
-    siteName: 'MealGenie',
+    siteName: 'Meal Genie',
     type: 'website',
-    locale: 'en_US',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'MealGenie — AI Personal Chef',
-    description: 'Jarvis for cooking from MealGenie by Komyosys.',
-  },
-  robots: {
-    index: true,
-    follow: true,
   },
   appleWebApp: {
     capable: true,
@@ -38,7 +28,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#1F6F54',
+  themeColor: '#22C55E',
 };
 
 export default function RootLayout({
@@ -48,14 +38,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body className="mobile-app">
         <ClerkProviderWrapper>{children}</ClerkProviderWrapper>
       </body>

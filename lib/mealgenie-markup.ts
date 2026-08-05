@@ -7,6 +7,8 @@ export const MEALGENIE_APP_INNER_HTML = `
                 <span class="logo-text">Meal Genie</span>
             </div>
             <div class="header-actions">
+                <button class="fridge-btn" onclick="toggleFridge()" aria-label="Fridge Scan">🧊</button>
+                <button class="more-btn" onclick="toggleMoreFeatures()" aria-label="More features">🧰</button>
                 <button class="blog-btn" onclick="toggleBlog()" aria-label="Community">💬</button>
                 <button class="header-btn" onclick="showFavorites()" aria-label="Favorites">
                     ❤️<span id="favCount">0</span>
@@ -109,6 +111,203 @@ export const MEALGENIE_APP_INNER_HTML = `
                 <p class="settings-hint" id="openRouterHint">AI is configured on the server — no key needed here.</p>
                 <input type="password" id="apiKeyInput" class="api-key-input" placeholder="sk-or-...">
                 <button class="save-api-key-btn" id="saveOpenRouterBtn" onclick="saveApiKey()">Save API Key</button>
+            </div>
+        </div>
+
+        <!-- Fridge Scan Panel -->
+        <div class="fridge-panel" id="fridgePanel">
+            <div class="fridge-panel-header">
+                <button class="fridge-panel-close" onclick="toggleFridge()">✕</button>
+                <h3 class="fridge-title">🧊 Fridge Scan</h3>
+                <span class="fridge-step-label" id="fridgeStepLabel">1 / 3</span>
+            </div>
+
+            <div class="fridge-step active" id="fridgeStepScan">
+                <p class="fridge-intro">Snap your fridge — AI detects ingredients, matches authentic recipes &amp; chef videos.</p>
+                <div class="fridge-camera-wrap">
+                    <video id="fridgeVideo" class="fridge-video" playsinline muted></video>
+                    <img id="fridgePreview" class="fridge-preview" alt="Fridge preview" hidden>
+                    <div class="fridge-scan-ring" id="fridgeScanRing"></div>
+                </div>
+                <div class="fridge-scan-actions">
+                    <button class="fridge-action-btn primary" onclick="openFridgeCamera()">📷 Open Camera</button>
+                    <label class="fridge-action-btn">
+                        🖼️ Upload Photo
+                        <input type="file" id="fridgeFileInput" accept="image/*" capture="environment" hidden onchange="handleFridgeFile(this)">
+                    </label>
+                </div>
+                <button class="fridge-action-btn scan" id="fridgeScanBtn" onclick="scanFridgeImage()" disabled>✨ Scan Fridge</button>
+                <div class="fridge-detected" id="fridgeDetected">
+                    <p class="fridge-detected-hint">Detected items appear here — tap to confirm.</p>
+                </div>
+                <button class="fridge-action-btn primary" id="fridgeNextPrefs" onclick="goFridgeStep(2)" disabled>Next: Customize →</button>
+            </div>
+
+            <div class="fridge-step" id="fridgeStepPrefs">
+                <p class="fridge-intro">Set your vibe — we'll pick meals, drinks &amp; sauces that fit.</p>
+                <div class="fridge-pref-block">
+                    <span class="fridge-pref-label">😊 Mood</span>
+                    <div class="fridge-chips" id="fridgeMoodChips">
+                        <button class="fridge-chip active" data-val="comfort" onclick="setFridgePref('mood','comfort',this)">🛋️ Comfort</button>
+                        <button class="fridge-chip" data-val="healthy" onclick="setFridgePref('mood','healthy',this)">💪 Healthy</button>
+                        <button class="fridge-chip" data-val="quick" onclick="setFridgePref('mood','quick',this)">⚡ Quick</button>
+                        <button class="fridge-chip" data-val="cozy" onclick="setFridgePref('mood','cozy',this)">☕ Cozy</button>
+                        <button class="fridge-chip" data-val="adventurous" onclick="setFridgePref('mood','adventurous',this)">🌍 Adventurous</button>
+                    </div>
+                </div>
+                <div class="fridge-pref-block">
+                    <span class="fridge-pref-label">💰 Budget</span>
+                    <div class="fridge-chips" id="fridgeBudgetChips">
+                        <button class="fridge-chip active" data-val="budget" onclick="setFridgePref('budget','budget',this)">💵 Budget</button>
+                        <button class="fridge-chip" data-val="moderate" onclick="setFridgePref('budget','moderate',this)">💳 Moderate</button>
+                        <button class="fridge-chip" data-val="any" onclick="setFridgePref('budget','any',this)">✨ Any</button>
+                    </div>
+                </div>
+                <div class="fridge-pref-block">
+                    <span class="fridge-pref-label">👥 Usage</span>
+                    <div class="fridge-chips" id="fridgeUsageChips">
+                        <button class="fridge-chip active" data-val="solo" onclick="setFridgePref('usage','solo',this)">1️⃣ Solo</button>
+                        <button class="fridge-chip" data-val="couple" onclick="setFridgePref('usage','couple',this)">👫 Couple</button>
+                        <button class="fridge-chip" data-val="family" onclick="setFridgePref('usage','family',this)">👨‍👩‍👧 Family</button>
+                        <button class="fridge-chip" data-val="prep" onclick="setFridgePref('usage','prep',this)">📦 Meal Prep</button>
+                    </div>
+                </div>
+                <div class="fridge-pref-block">
+                    <span class="fridge-pref-label">🍽️ Servings</span>
+                    <div class="fridge-chips">
+                        <button class="fridge-chip" data-val="1" onclick="setFridgePref('servings','1',this)">1</button>
+                        <button class="fridge-chip active" data-val="2" onclick="setFridgePref('servings','2',this)">2</button>
+                        <button class="fridge-chip" data-val="4" onclick="setFridgePref('servings','4',this)">4</button>
+                        <button class="fridge-chip" data-val="6" onclick="setFridgePref('servings','6',this)">6</button>
+                    </div>
+                </div>
+                <button class="fridge-action-btn" onclick="goFridgeStep(1)">← Back</button>
+                <button class="fridge-action-btn primary" onclick="generateFridgeMenu()">🍳 Generate My Menu</button>
+            </div>
+
+            <div class="fridge-step" id="fridgeStepResults">
+                <div id="fridgeResults"></div>
+                <button class="fridge-action-btn" onclick="goFridgeStep(2)">← Customize Again</button>
+                <button class="fridge-action-btn primary" onclick="applyFridgeToKitchen()">✅ Use in Kitchen</button>
+            </div>
+        </div>
+
+
+        <!-- More Features Hub -->
+        <div class="fridge-panel" id="moreFeaturesPanel">
+            <div class="fridge-panel-header" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">
+                <button class="fridge-panel-close" onclick="toggleMoreFeatures()">✕</button>
+                <h3 class="fridge-title">🧰 More Features</h3>
+            </div>
+            <div class="fridge-step active" style="display:block">
+                <p class="fridge-intro">Extra tools for your kitchen — same Meal Genie style.</p>
+                <div class="feature-hub-grid">
+                    <button class="feature-hub-card" onclick="openFeaturePanel('pantry')">
+                        <span>🧺</span>
+                        <strong>Pantry Inventory</strong>
+                        <em>Save ingredients, quantities &amp; expiry</em>
+                    </button>
+                    <button class="feature-hub-card" onclick="openFeaturePanel('planner')">
+                        <span>📅</span>
+                        <strong>Weekly Meal Planner</strong>
+                        <em>Breakfast, lunch, dinner &amp; snacks</em>
+                    </button>
+                    <button class="feature-hub-card" onclick="openFeaturePanel('grocery')">
+                        <span>🛒</span>
+                        <strong>Grocery List</strong>
+                        <em>Missing items vs pantry</em>
+                    </button>
+                    <button class="feature-hub-card" onclick="openFeaturePanel('fridge')">
+                        <span>🧊</span>
+                        <strong>Fridge Photo Scan</strong>
+                        <em>Camera / upload → ingredient chips</em>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantry Inventory Panel -->
+        <div class="fridge-panel" id="pantryPanel">
+            <div class="fridge-panel-header" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0)">
+                <button class="fridge-panel-close" onclick="closeFeaturePanel('pantry')">✕</button>
+                <h3 class="fridge-title">🧺 Pantry Inventory</h3>
+            </div>
+            <div class="fridge-step active" style="display:block">
+                <div class="feature-toolbar">
+                    <input type="search" id="pantrySearch" class="feature-input" placeholder="Search pantry..." oninput="renderPantryPanel()">
+                    <select id="pantryFilter" class="feature-input" onchange="renderPantryPanel()">
+                        <option value="all">All</option>
+                        <option value="expiring">Expiring soon</option>
+                        <option value="vegetables">Vegetables</option>
+                        <option value="fruits">Fruits</option>
+                        <option value="dairy">Dairy</option>
+                        <option value="meat">Meat</option>
+                        <option value="grains">Grains</option>
+                        <option value="spices">Spices</option>
+                        <option value="drinks">Drinks</option>
+                        <option value="frozen">Frozen</option>
+                        <option value="snacks">Snacks</option>
+                    </select>
+                </div>
+                <form class="feature-form" onsubmit="return addPantryItem(event)">
+                    <input id="pantryName" class="feature-input" placeholder="Ingredient name" required>
+                    <select id="pantryCat" class="feature-input">
+                        <option value="vegetables">Vegetables</option>
+                        <option value="fruits">Fruits</option>
+                        <option value="dairy">Dairy</option>
+                        <option value="meat">Meat</option>
+                        <option value="grains">Grains</option>
+                        <option value="spices">Spices</option>
+                        <option value="drinks">Drinks</option>
+                        <option value="frozen">Frozen</option>
+                        <option value="snacks">Snacks</option>
+                    </select>
+                    <input id="pantryQty" class="feature-input" type="number" min="0" step="0.1" value="1" placeholder="Qty">
+                    <input id="pantryUnit" class="feature-input" placeholder="unit" value="pcs">
+                    <input id="pantryExp" class="feature-input" type="date">
+                    <button type="submit" class="fridge-action-btn primary">Add</button>
+                </form>
+                <div id="pantryList" class="feature-list"></div>
+                <div class="fridge-scan-actions" style="margin-top:12px">
+                    <button type="button" class="fridge-action-btn primary" onclick="applyPantryToKitchen()">✅ Use in Leftovers</button>
+                    <button type="button" class="fridge-action-btn" onclick="openFeaturePanel('more')">← Features</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Planner Panel -->
+        <div class="fridge-panel" id="plannerPanel">
+            <div class="fridge-panel-header" style="background:linear-gradient(135deg,#E0E7FF,#C7D2FE)">
+                <button class="fridge-panel-close" onclick="closeFeaturePanel('planner')">✕</button>
+                <h3 class="fridge-title">📅 Weekly Meal Planner</h3>
+            </div>
+            <div class="fridge-step active" style="display:block">
+                <div class="feature-toolbar">
+                    <button type="button" class="fridge-action-btn primary" onclick="aiGenerateWeekPlan()">✨ AI Generate Week</button>
+                    <button type="button" class="fridge-action-btn" onclick="printFeaturePanel('plannerPrint')">🖨 Print</button>
+                    <button type="button" class="fridge-action-btn" onclick="openFeaturePanel('more')">← Features</button>
+                </div>
+                <p class="fridge-intro" id="plannerNote">Plan breakfast, lunch, dinner &amp; snacks. Tap Replace to swap a meal.</p>
+                <div id="plannerPrint" class="planner-grid"></div>
+            </div>
+        </div>
+
+        <!-- Grocery List Panel -->
+        <div class="fridge-panel" id="groceryPanel">
+            <div class="fridge-panel-header" style="background:linear-gradient(135deg,#FFE4E6,#FECDD3)">
+                <button class="fridge-panel-close" onclick="closeFeaturePanel('grocery')">✕</button>
+                <h3 class="fridge-title">🛒 Grocery List</h3>
+            </div>
+            <div class="fridge-step active" style="display:block">
+                <div class="feature-toolbar">
+                    <button type="button" class="fridge-action-btn primary" onclick="rebuildGroceryFromPantry()">Compare vs Pantry</button>
+                    <button type="button" class="fridge-action-btn" onclick="copyGroceryList()">📋 Copy</button>
+                    <button type="button" class="fridge-action-btn" onclick="printFeaturePanel('groceryPrint')">🖨 Print / PDF</button>
+                    <button type="button" class="fridge-action-btn" onclick="shareGroceryList()">↗ Share</button>
+                    <button type="button" class="fridge-action-btn" onclick="openFeaturePanel('more')">← Features</button>
+                </div>
+                <p class="fridge-intro" id="groceryStatus">Missing ingredients, merged &amp; grouped by category.</p>
+                <div id="groceryPrint" class="feature-list"></div>
             </div>
         </div>
 
