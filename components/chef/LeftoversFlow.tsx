@@ -1,26 +1,42 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from '@/components/chef/chef.module.css';
 import { FridgeScanPanel } from '@/components/chef/FridgeScanPanel';
 import { CATALOG_INGREDIENTS, INGREDIENT_CATEGORIES } from '@/lib/chef/ingredients';
+import { pantryNamesForLeftovers } from '@/lib/chef/pantry-storage';
 import type { LeftoversInput, UserTasteMemory } from '@/lib/chef/types';
 
-type Tab = 'photo' | 'chips' | 'type' | 'voice';
+type Tab = 'photo' | 'pantry' | 'chips' | 'type' | 'voice';
 
 type Props = {
   memory: UserTasteMemory;
+  initialIngredients?: string[];
   onBack: () => void;
   onComplete: (input: LeftoversInput) => void;
+  onOpenPantry?: () => void;
 };
 
-export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
-  const [tab, setTab] = useState<Tab>('photo');
-  const [selected, setSelected] = useState<string[]>([]);
+export function LeftoversFlow({
+  memory,
+  initialIngredients = [],
+  onBack,
+  onComplete,
+  onOpenPantry,
+}: Props) {
+  const [tab, setTab] = useState<Tab>(initialIngredients.length ? 'pantry' : 'photo');
+  const [selected, setSelected] = useState<string[]>(() => [...initialIngredients]);
   const [typed, setTyped] = useState('');
   const [listening, setListening] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState('Tap the mic and say what you have.');
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const pantryCount = useMemo(() => pantryNamesForLeftovers().length, [selected]);
+
+  useEffect(() => {
+    if (!initialIngredients.length) return;
+    setSelected((prev) => Array.from(new Set([...prev, ...initialIngredients])));
+    setTab('pantry');
+  }, [initialIngredients]);
 
   const disliked = useMemo(
     () => new Set(memory.dislikedIngredients.map((i) => i.toLowerCase())),
@@ -45,6 +61,15 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
     if (!parts.length) return;
     mergeIngredients(parts);
     setTyped('');
+  }
+
+  function loadFromPantry() {
+    const names = pantryNamesForLeftovers();
+    if (!names.length) {
+      setVoiceStatus('Pantry is empty — add items in Pantry Inventory first.');
+      return;
+    }
+    mergeIngredients(names);
   }
 
   function startVoice() {
@@ -100,7 +125,7 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
       <div className={styles.panelHeader}>
         <div>
           <h2>Cook with Leftovers</h2>
-          <p>Scan your fridge, or add ingredients by voice, typing, or chips.</p>
+          <p>Scan your fridge, pull from pantry, or add ingredients by voice, typing, or chips.</p>
         </div>
         <button type="button" className={styles.ghostBtn} onClick={onBack}>
           Back
@@ -112,7 +137,7 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
         <div>
           {selected.length
             ? `Nice — ${selected.length} ingredient${selected.length === 1 ? '' : 's'} locked in.`
-            : 'Start with Scan My Fridge, or pick another input method.'}
+            : 'Start with Scan My Fridge, pantry fill, or another input method.'}
         </div>
       </div>
 
@@ -120,6 +145,7 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
         {(
           [
             ['photo', 'Scan fridge'],
+            ['pantry', 'From pantry'],
             ['chips', 'Select chips'],
             ['type', 'Type'],
             ['voice', 'Voice'],
@@ -146,6 +172,26 @@ export function LeftoversFlow({ memory, onBack, onComplete }: Props) {
             mergeIngredients(names);
           }}
         />
+      )}
+
+      {tab === 'pantry' && (
+        <div>
+          <p className={styles.muted}>
+            {pantryCount
+              ? `You have ${pantryCount} usable pantry item${pantryCount === 1 ? '' : 's'} (non-expired).`
+              : 'No usable pantry items yet.'}
+          </p>
+          <div className={styles.row}>
+            <button type="button" className={styles.primaryBtn} onClick={loadFromPantry}>
+              Auto-fill from pantry
+            </button>
+            {onOpenPantry && (
+              <button type="button" className={styles.ghostBtn} onClick={onOpenPantry}>
+                Manage pantry
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       {tab === 'type' && (

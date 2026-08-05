@@ -1,0 +1,249 @@
+.panel {
+  display: grid;
+  gap: 16px;
+}
+
+.toolbar {
+  display: grid;
+  gap: 12px;
+}
+
+.searchRow,
+.filterRow,
+.formGrid,
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.searchInput,
+.field,
+.select {
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--chef-line);
+  background: color-mix(in srgb, var(--chef-bg) 70%, transparent);
+  color: var(--chef-ink);
+  padding: 0 14px;
+  font: inherit;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 180px;
+}
+
+.field,
+.select {
+  width: 100%;
+}
+
+.filterChip {
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--chef-line);
+  background: color-mix(in srgb, var(--chef-bg) 55%, transparent);
+  color: var(--chef-ink);
+  padding: 8px 12px;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.filterChip[data-active='true'] {
+  background: var(--chef-brand);
+  border-color: transparent;
+  color: #fff;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.statCard {
+  border: 1px solid var(--chef-line);
+  background: var(--chef-bg-elevated);
+  backdrop-filter: blur(16px);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--chef-muted);
+  margin-bottom: 4px;
+}
+
+.statValue {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 24px;
+  letter-spacing: -0.03em;
+}
+
+.progressTrack {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--chef-line);
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--chef-brand), var(--chef-accent));
+}
+
+.formCard {
+  border: 1px solid var(--chef-line);
+  background: var(--chef-bg-elevated);
+  backdrop-filter: blur(18px);
+  border-radius: 20px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.formTitle {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 20px;
+  margin: 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.formGrid .full {
+  grid-column: 1 / -1;
+}
+
+.label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--chef-muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid var(--chef-line);
+  background: color-mix(in srgb, var(--chef-bg-elevated) 90%, transparent);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  box-shadow: var(--chef-shadow);
+}
+
+.card[data-state='expired'] {
+  border-color: color-mix(in srgb, var(--chef-danger) 45%, var(--chef-line));
+}
+
+.card[data-state='soon'] {
+  border-color: color-mix(in srgb, var(--chef-accent) 50%, var(--chef-line));
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  background: var(--chef-brand-soft);
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.cardMeta {
+  margin: 2px 0 0;
+  color: var(--chef-muted);
+  font-size: 13px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--chef-brand-soft);
+  color: var(--chef-brand);
+}
+
+.badge[data-tone='warn'] {
+  background: color-mix(in srgb, var(--chef-accent) 18%, transparent);
+  color: var(--chef-accent);
+}
+
+.badge[data-tone='danger'] {
+  background: color-mix(in srgb, var(--chef-danger) 14%, transparent);
+  color: var(--chef-danger);
+}
+
+.empty {
+  text-align: center;
+  color: var(--chef-muted);
+  padding: 28px 12px;
+  border: 1px dashed var(--chef-line);
+  border-radius: 18px;
+}
+
+.primaryBtn,
+.ghostBtn {
+  min-height: 44px;
+  border-radius: 14px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryBtn {
+  border: none;
+  background: var(--chef-brand);
+  color: #fff;
+}
+
+.ghostBtn {
+  border: 1px solid var(--chef-line);
+  background: transparent;
+  color: var(--chef-ink);
+}
+
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .statsRow,
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

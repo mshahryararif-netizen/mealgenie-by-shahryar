@@ -155,12 +155,12 @@
 
 .modeGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   margin-top: 32px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .modeGrid {
     grid-template-columns: 1fr;
   }
@@ -548,6 +548,73 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.hubTitle {
+  margin: 36px 0 14px;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 22px;
+}
+
+.hubGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.hubCard {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  border: 1px solid var(--chef-line);
+  background: var(--chef-bg-elevated);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  padding: 14px;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  box-shadow: var(--chef-shadow);
+  transition: transform 180ms ease, border-color 180ms ease;
+}
+
+.hubCard:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--chef-brand) 45%, var(--chef-line));
+}
+
+.hubCard strong {
+  font-size: 14px;
+}
+
+.hubCard span:last-child {
+  color: var(--chef-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.hubIcon {
+  font-size: 22px;
+}
+
+.syncToast {
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 0 20px 8px;
+  color: var(--chef-muted);
+  font-size: 13px;
+}
+
+.input,
+.select {
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--chef-line);
+  background: color-mix(in srgb, var(--chef-bg) 70%, transparent);
+  color: var(--chef-ink);
+  padding: 0 12px;
+  font: inherit;
+  flex: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

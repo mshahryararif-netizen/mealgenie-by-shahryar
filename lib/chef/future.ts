@@ -6,7 +6,7 @@ export const FUTURE_FEATURES = [
   'AI voice cooking mode (present as VoiceChef v1)',
   'Voice conversations',
   'Fridge image recognition (present as FridgeScanPanel v1)',
-  'Pantry inventory',
+  'Pantry inventory (present as PantryPanel v1 + localStorage)',
   'Weekly meal planner',
   'Grocery shopping list',
   'Budget tracking',

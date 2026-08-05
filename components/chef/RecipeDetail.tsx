@@ -7,9 +7,19 @@ type Props = {
   recipe: ChefRecipe;
   onBack: () => void;
   onCookWithVoice: () => void;
+  onPlating?: () => void;
+  onShare?: () => void;
+  onMarkCooked?: () => void;
 };
 
-export function RecipeDetail({ recipe, onBack, onCookWithVoice }: Props) {
+export function RecipeDetail({
+  recipe,
+  onBack,
+  onCookWithVoice,
+  onPlating,
+  onShare,
+  onMarkCooked,
+}: Props) {
   return (
     <section className={styles.panel}>
       <div className={styles.panelHeader}>
@@ -100,6 +110,21 @@ export function RecipeDetail({ recipe, onBack, onCookWithVoice }: Props) {
           <button type="button" className={styles.primaryBtn} onClick={onCookWithVoice}>
             Cook with voice chef
           </button>
+          {onPlating && (
+            <button type="button" className={styles.ghostBtn} onClick={onPlating}>
+              Plating tips
+            </button>
+          )}
+          {onShare && (
+            <button type="button" className={styles.ghostBtn} onClick={onShare}>
+              Share
+            </button>
+          )}
+          {onMarkCooked && (
+            <button type="button" className={styles.ghostBtn} onClick={onMarkCooked}>
+              Mark cooked
+            </button>
+          )}
         </div>
       </div>
     </section>

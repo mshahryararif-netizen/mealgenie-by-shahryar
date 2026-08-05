@@ -182,5 +182,6 @@ enum MealType {
   DRINK
 }
 
-// Future-ready (not migrated yet): GroceryList, GroceryItem, Pantry, PantryItem,
-// NutritionProfile, ShoppingHistory — add when features are implemented.
+// Feature bags (planner, pantry, grocery, budget, family, history, achievements)
+// sync into UserPreference.payload via /api/chef/sync until dedicated tables ship.
+// Future-ready tables: GroceryList, PantryItem, NutritionLog, AchievementUnlock.

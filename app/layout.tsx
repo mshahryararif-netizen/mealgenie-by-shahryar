@@ -7,6 +7,23 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'MealGenie — AI Personal Chef',
   description: 'Jarvis for cooking. Personalized recipes, leftovers magic, and voice coaching.',
+  openGraph: {
+    title: 'MealGenie — AI Personal Chef',
+    description: 'Scan your fridge, plan meals, track nutrition, and cook with voice coaching.',
+    url: SITE_URL,
+    siteName: 'MealGenie',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MealGenie — AI Personal Chef',
+    description: 'Jarvis for cooking from MealGenie by Komyosys.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

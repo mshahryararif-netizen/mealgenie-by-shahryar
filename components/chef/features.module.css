@@ -1,0 +1,37 @@
+.wrap { display: grid; gap: 16px; }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; }
+.grid7 { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 10px; overflow-x: auto; }
+.dayCol { min-width: 140px; border: 1px solid var(--chef-line); border-radius: 18px; background: var(--chef-bg-elevated); backdrop-filter: blur(14px); padding: 10px; display: grid; gap: 8px; }
+.dayTitle { font-weight: 700; font-size: 14px; }
+.slot { border: 1px dashed var(--chef-line); border-radius: 14px; padding: 8px; min-height: 78px; background: color-mix(in srgb, var(--chef-bg) 55%, transparent); cursor: grab; }
+.slot h4 { margin: 0 0 4px; font-size: 12px; color: var(--chef-muted); font-weight: 600; }
+.meal { font-size: 13px; font-weight: 600; }
+.meta { font-size: 11px; color: var(--chef-muted); }
+.list { display: grid; gap: 8px; }
+.rowItem { display: flex; gap: 10px; align-items: center; border: 1px solid var(--chef-line); border-radius: 14px; padding: 12px; background: color-mix(in srgb, var(--chef-bg-elevated) 88%, transparent); }
+.rowItem input[type='checkbox'] { width: 18px; height: 18px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.card { border: 1px solid var(--chef-line); border-radius: 18px; padding: 14px; background: var(--chef-bg-elevated); backdrop-filter: blur(16px); box-shadow: var(--chef-shadow); }
+.card h3 { margin: 0 0 6px; font-size: 16px; }
+.muted { color: var(--chef-muted); font-size: 13px; line-height: 1.45; }
+.barTrack { height: 10px; border-radius: 999px; background: var(--chef-line); overflow: hidden; }
+.barFill { height: 100%; background: linear-gradient(90deg, var(--chef-brand), var(--chef-accent)); }
+.chartRow { display: grid; gap: 8px; }
+.chartBar { display: grid; grid-template-columns: 70px 1fr 48px; gap: 8px; align-items: center; font-size: 13px; }
+.badge { display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; border-radius: 999px; background: var(--chef-brand-soft); color: var(--chef-brand); font-size: 12px; font-weight: 700; }
+.profileGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.profile { border: 1px solid var(--chef-line); border-radius: 16px; padding: 12px; cursor: pointer; background: color-mix(in srgb, var(--chef-bg) 60%, transparent); }
+.profile[data-active='true'] { border-color: var(--chef-brand); box-shadow: 0 0 0 2px var(--chef-brand-soft); }
+.scannerBox { border: 1px dashed var(--chef-line); border-radius: 18px; padding: 16px; text-align: center; }
+.video { width: 100%; max-width: 420px; border-radius: 16px; background: #000; aspect-ratio: 4/3; object-fit: cover; }
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 80; overflow: hidden; }
+.confetti i { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: fall 1.2s linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(240deg); opacity: 0; } }
+.shareCard { display: grid; gap: 12px; justify-items: start; }
+.qr { width: 140px; height: 140px; border-radius: 12px; background: #fff; padding: 8px; }
+@media (max-width: 900px) {
+  .grid7 { grid-template-columns: repeat(7, minmax(150px, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti i { animation: none; }
+}
