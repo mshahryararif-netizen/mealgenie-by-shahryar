@@ -5,7 +5,8 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Meal Genie',
+  title: 'MealGenie — AI Personal Chef',
+  description: 'Jarvis for cooking. Personalized recipes, leftovers magic, and voice coaching.',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -20,7 +21,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#22C55E',
+  themeColor: '#1F6F54',
 };
 
 export default function RootLayout({
@@ -30,6 +31,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="mobile-app">
         <ClerkProviderWrapper>{children}</ClerkProviderWrapper>
       </body>
